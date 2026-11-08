@@ -18,7 +18,7 @@ mkdir -p build/logs
 command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
 xcodegen generate --quiet
 
-echo "== 归档（Release，构建号 $BUILD_NUMBER）=="
+echo "== 归档（Release，构建号 ${BUILD_NUMBER}）=="
 rm -rf "$ARCHIVE" "$EXPORT"
 xcodebuild archive \
   -project StarSprout.xcodeproj -scheme StarSprout -configuration Release \
