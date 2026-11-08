@@ -61,11 +61,12 @@ struct TreeGallery: View {
                     Text("\(stage)").font(.caption.bold()).foregroundStyle(Theme.muted).frame(width: 14)
                     ForEach(moods, id: \.self) { mood in
                         ZStack(alignment: .bottom) {
-                            PlanetBody(stage: stage, diameter: 150).offset(y: 112)
-                            GrassCap(stage: stage).scaleEffect(0.38, anchor: .bottom).padding(.bottom, 26)
-                            TreeView(stage: stage, mood: mood).scaleEffect(0.38, anchor: .bottom).padding(.bottom, 32)
+                            // 和星球页同样的构图，整体缩小到 0.28
+                            PlanetBody(stage: stage, diameter: 95).offset(y: 56)
+                            GrassCap(stage: stage).scaleEffect(0.28, anchor: .bottom).padding(.bottom, 34)
+                            TreeView(stage: stage, mood: mood).scaleEffect(0.28, anchor: .bottom).padding(.bottom, 38)
                         }
-                        .frame(width: 92, height: 106)
+                        .frame(width: 92, height: 110, alignment: .bottom)
                         .clipped()
                         .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
                     }
