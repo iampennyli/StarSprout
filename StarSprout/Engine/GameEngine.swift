@@ -195,7 +195,9 @@ enum GameEngine {
                                               settings: s, now: now)
         try? ctx.save()
 
-        let recent = Array((sameKind.map(\.value) + [value]).suffix(5))
+        // 待核实的可疑成绩不进“最近 5 次”图表，免得和“破纪录”自相矛盾
+        let trusted = sameKind.filter { !$0.suspicious || $0.verified }.map(\.value)
+        let recent = Array((trusted + [value]).suffix(5))
         return SubmitResult(checkIn: ci, previousBest: previousBest, lastValue: lastValue,
                             gotWater: !hadWaterToday, coins: coins, coinsPending: coinsPending,
                             realRewardType: task.rewardType, realRewardAmount: realAmount,

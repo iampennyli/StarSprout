@@ -154,7 +154,7 @@ struct TaskCard: View {
                     .background(task.kind == .rope ? Theme.lime : Theme.cyan, in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
                     Text(task.kind.title).font(Theme.titleFont(22))
-                    Text("\(task.targetText) · 今天已达标 \(reachedToday) 次")
+                    Text(reachedToday > 0 ? "\(task.targetText) · 今天已达标 \(reachedToday) 次" : task.targetText)
                         .font(.footnote).foregroundStyle(Theme.muted)
                 }
             }

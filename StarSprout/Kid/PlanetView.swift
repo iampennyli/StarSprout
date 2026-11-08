@@ -84,9 +84,16 @@ struct PlanetView: View {
     private var scene: some View {
         ZStack(alignment: .bottom) {
             Circle().fill(Theme.leaf.opacity(0.08)).frame(width: 260, height: 260).padding(.bottom, 150)
-            Ellipse().stroke(Theme.pink.opacity(0.5), lineWidth: 4).frame(width: 370, height: 66).padding(.bottom, 28)
+            // 星环后半圈在星球后面，前半圈压在星球前面，看起来是环绕而不是穿过
+            Ellipse().trim(from: 0.5, to: 1).stroke(Theme.pink.opacity(0.35), lineWidth: 4)
+                .frame(width: 370, height: 66).padding(.bottom, 28)
             Circle().fill(Theme.planet).frame(width: 340, height: 340).offset(y: 200)
-            Capsule().fill(Theme.leaf).frame(width: stage >= 3 ? 280 : 0, height: 20).padding(.bottom, 122)
+            Ellipse().trim(from: 0, to: 0.5).stroke(Theme.pink.opacity(0.6), lineWidth: 4)
+                .frame(width: 370, height: 66).padding(.bottom, 28)
+            // 星球顶上的一片草地，小树长在上面；种子阶段只是一小块土
+            Ellipse().fill(stage >= 3 ? Theme.leaf : Theme.leaf.opacity(0.55))
+                .frame(width: stage >= 3 ? 200 : 110, height: stage >= 3 ? 30 : 20)
+                .padding(.bottom, stage >= 3 ? 125 : 130)
 
             Button(action: tapTree) {
                 TreeView(stage: stage, mood: mood)

@@ -30,7 +30,16 @@ struct ParentHomeView: View {
 struct ParentToolbar: ToolbarContent {
     var exit: () -> Void
     var body: some ToolbarContent {
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            ToolbarItem(placement: .topBarLeading) { ParentModeBadge() }
+                .sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: .topBarLeading) { ParentModeBadge() }
+        }
+        #else
         ToolbarItem(placement: .topBarLeading) { ParentModeBadge() }
+        #endif
         ToolbarItem(placement: .topBarTrailing) { Button("退出", action: exit) }
     }
 }

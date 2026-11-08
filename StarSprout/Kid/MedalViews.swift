@@ -94,8 +94,6 @@ struct MedalUnlockView: View {
             Theme.bgDeep.ignoresSafeArea()
             StarField()
             if let def {
-                Circle().fill(def.rarity.color.opacity(0.08)).frame(width: 520)
-                RaysView(color: def.rarity.color).frame(width: 420, height: 420).opacity(flipped ? 1 : 0)
                 VStack(spacing: 16) {
                     Text("获得新勋章！").font(Theme.titleFont(30))
                     MedalCardView(def: def, earnedAt: record.earnedAt,
@@ -106,7 +104,7 @@ struct MedalUnlockView: View {
                                   width: 300)
                         .rotation3DEffect(.degrees(flipped ? 0 : 90), axis: (x: 0, y: 1, z: 0))
                         .scaleEffect(flipped ? 1 : 0.6)
-                    Text("已通知爸爸妈妈 · 勋章永远属于你").font(.footnote).foregroundStyle(Theme.muted)
+                    Text("这枚勋章永远属于你").font(.footnote).foregroundStyle(Theme.muted)
                     Spacer(minLength: 0)
                     HStack(spacing: 10) {
                         Button("收下", action: onDone).buttonStyle(OutlineButtonStyle(color: .white, height: 54))
@@ -114,6 +112,16 @@ struct MedalUnlockView: View {
                     }
                 }
                 .padding(20)
+                .frame(maxWidth: .infinity)
+                .background {
+                    // 光晕和光芒只做背景，不参与布局，避免把按钮撑出屏幕
+                    ZStack {
+                        Circle().fill(def.rarity.color.opacity(0.08)).frame(width: 520, height: 520)
+                        RaysView(color: def.rarity.color).frame(width: 420, height: 420).opacity(flipped ? 1 : 0)
+                    }
+                    .offset(y: -60)
+                    .allowsHitTesting(false)
+                }
             }
         }
         .onAppear {

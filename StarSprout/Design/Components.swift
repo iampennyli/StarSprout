@@ -102,6 +102,8 @@ struct ParentModeBadge: View {
         Text("家长模式")
             .font(.system(size: 12, weight: .bold))
             .foregroundStyle(Theme.gold)
+            .lineLimit(1)
+            .fixedSize()
             .padding(.horizontal, 10).frame(height: 26)
             .overlay(Capsule().stroke(Theme.gold, lineWidth: 1))
     }

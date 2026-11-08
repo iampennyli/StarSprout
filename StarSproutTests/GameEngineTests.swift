@@ -90,6 +90,14 @@ final class GameEngineTests: XCTestCase {
         XCTAssertEqual(GameEngine.balance(.coins, entries), 0)
     }
 
+    func testUnverifiedSuspiciousValueLeftOutOfRecentChart() {
+        GameEngine.submit(task: rope, value: 160, ctx: ctx, now: day(0))
+        GameEngine.submit(task: rope, value: 232, ctx: ctx, now: day(1))
+        let r = GameEngine.submit(task: rope, value: 170, ctx: ctx, now: day(2))
+        XCTAssertEqual(r.recentValues, [160, 170])
+        XCTAssertTrue(r.checkIn.isRecord)
+    }
+
     func testWateringLimitedToThreePerDay() {
         GameEngine.submit(task: rope, value: 100, ctx: ctx, now: day(0))
         for _ in 0..<3 {
