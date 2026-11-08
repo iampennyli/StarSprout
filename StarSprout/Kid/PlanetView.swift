@@ -10,6 +10,9 @@ struct PlanetView: View {
     @Query private var settingsList: [AppSettings]
     @Query private var decorations: [OwnedDecoration]
     @State private var showShop = false
+    @State private var showDebug = false
+    /// 调试面板关闭后刷新（小树状态覆盖存在 UserDefaults 里，SwiftUI 感知不到）
+    @State private var debugTick = 0
     @State private var islandAngle: Double = 0
     @GestureState private var dragAngle: Double = 0
     @State private var floatUp = false
@@ -32,7 +35,10 @@ struct PlanetView: View {
     private var tree: TreeState? { trees.first }
     private var growth: Int { tree?.growth ?? 0 }
     private var stage: Int { Economy.stage(for: growth) }
-    private var mood: TreeMood { GameEngine.mood(checkIns) }
+    private var mood: TreeMood {
+        _ = debugTick
+        return GameEngine.mood(checkIns)
+    }
     private var water: Int { GameEngine.waterLeft(entries) }
     private var coins: Int { Int(GameEngine.balance(.coins, entries)) }
     private var decor: [DecorSlot: String] { GameEngine.equippedDecorations(decorations) }
@@ -54,6 +60,17 @@ struct PlanetView: View {
         .sheet(isPresented: $showShop) {
             DecorationShopView(stage: stage, mood: mood)
         }
+        #if DEBUG
+        .sheet(isPresented: $showDebug, onDismiss: { debugTick += 1 }) {
+            DebugPanelView { s in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    SoundManager.shared.play(.levelup)
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { levelUp = s }
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
+        #endif
         .onAppear {
             sway = true
             SoundManager.shared.startMusic()
@@ -72,6 +89,14 @@ struct PlanetView: View {
             HStack {
                 Text("\(settingsList.first?.childName ?? "")的星球").font(Theme.titleFont(30))
                 Spacer()
+                #if DEBUG
+                Button { showDebug = true } label: {
+                    Image(systemName: "ladybug.fill").font(.subheadline).foregroundStyle(Theme.pink)
+                        .frame(width: 34, height: 34)
+                        .background(Theme.card, in: Circle())
+                }
+                .accessibilityLabel("调试面板")
+                #endif
                 chip(icon: "drop.fill", text: "\(water)/\(Economy.waterPerDay)", color: Theme.cyan)
                 chip(icon: "circle.circle.fill", text: "\(coins)", color: Theme.gold)
             }

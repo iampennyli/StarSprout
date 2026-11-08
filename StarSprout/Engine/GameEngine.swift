@@ -115,6 +115,9 @@ enum GameEngine {
     // MARK: - Tree mood
 
     static func mood(_ checkIns: [CheckIn], now: Date = .now) -> TreeMood {
+        #if DEBUG
+        if let forced = DebugFlags.moodOverride { return forced }
+        #endif
         guard let last = checkIns.map(\.date).max() else { return .normal }
         return TreeMood.from(daysSinceExercise: daysBetween(last, now))
     }
@@ -219,13 +222,19 @@ enum GameEngine {
 
     static func water(ctx: ModelContext, now: Date = .now) -> TreeActionResult {
         let entries = fetch(LedgerEntry.self, ctx)
-        guard waterLeft(entries, now: now) >= 1 else { return .noWater }
+        var free = false
+        #if DEBUG
+        free = DebugFlags.unlimitedWater
+        #endif
+        guard free || waterLeft(entries, now: now) >= 1 else { return .noWater }
         let t = tree(ctx)
         let before = Economy.stage(for: t.growth)
         let add = t.comebackPending ? 2 : 1
         t.comebackPending = false
-        ctx.insert(LedgerEntry(currency: .water, amount: -1,
-                               reason: add == 2 ? "浇水（回归礼，成长翻倍）" : "浇水", date: now))
+        if !free {
+            ctx.insert(LedgerEntry(currency: .water, amount: -1,
+                                   reason: add == 2 ? "浇水（回归礼，成长翻倍）" : "浇水", date: now))
+        }
         t.growth += add
         let after = Economy.stage(for: t.growth)
         try? ctx.save()
@@ -234,14 +243,20 @@ enum GameEngine {
 
     static func fertilize(ctx: ModelContext, now: Date = .now) -> TreeActionResult {
         let t = tree(ctx)
+        var free = false
+        #if DEBUG
+        free = DebugFlags.freeFertilizer
+        #endif
         let left = fertilizerDaysLeft(t, now: now)
-        if left > 0 { return .cooldown(daysLeft: left) }
+        if left > 0 && !free { return .cooldown(daysLeft: left) }
         let entries = fetch(LedgerEntry.self, ctx)
-        guard balance(.coins, entries) >= Double(Economy.fertilizerCost) else { return .noCoins }
+        guard free || balance(.coins, entries) >= Double(Economy.fertilizerCost) else { return .noCoins }
         let before = Economy.stage(for: t.growth)
-        ctx.insert(LedgerEntry(currency: .coins, amount: -Double(Economy.fertilizerCost), reason: "施肥", date: now))
+        if !free {
+            ctx.insert(LedgerEntry(currency: .coins, amount: -Double(Economy.fertilizerCost), reason: "施肥", date: now))
+            t.lastFertilizedAt = now
+        }
         t.growth += Economy.fertilizerGrowth
-        t.lastFertilizedAt = now
         let after = Economy.stage(for: t.growth)
         try? ctx.save()
         return .grew(added: Economy.fertilizerGrowth, newStage: after > before ? after : nil)

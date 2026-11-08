@@ -16,6 +16,9 @@ final class GameEngineTests: XCTestCase {
     }
 
     override func setUp() async throws {
+        #if DEBUG
+        DebugFlags.reset()
+        #endif
         let schema = Schema(AppSchema.models)
         container = try ModelContainer(for: schema, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         ctx = ModelContext(container)
@@ -159,6 +162,28 @@ final class GameEngineTests: XCTestCase {
         XCTAssertEqual(ids.count, Set(ids).count)
         for slot in DecorSlot.allCases { XCTAssertFalse(DecorCatalog.items(in: slot).isEmpty, slot.rawValue) }
     }
+
+    #if DEBUG
+    func testDebugUnlimitedWaterAndFreeFertilizer() {
+        defer { DebugFlags.reset() }
+        DebugFlags.unlimitedWater = true
+        for _ in 0..<5 { XCTAssertNotEqual(GameEngine.water(ctx: ctx, now: day(0)), .noWater) }
+        XCTAssertEqual(GameEngine.tree(ctx).growth, 5)
+        DebugFlags.freeFertilizer = true
+        XCTAssertNotEqual(GameEngine.fertilize(ctx: ctx, now: day(0)), .noCoins)
+        XCTAssertNotEqual(GameEngine.fertilize(ctx: ctx, now: day(0)), .cooldown(daysLeft: 3))
+        XCTAssertEqual(GameEngine.tree(ctx).growth, 11)
+        XCTAssertTrue(entries.isEmpty, "调试模式下浇水施肥不记账")
+    }
+
+    func testDebugSetStageAndMoodOverride() {
+        defer { DebugFlags.reset() }
+        GameEngine.debugSetStage(6, ctx: ctx)
+        XCTAssertEqual(Economy.stage(for: GameEngine.tree(ctx).growth), 6)
+        DebugFlags.moodOverride = .hibernating
+        XCTAssertEqual(GameEngine.mood([]), .hibernating)
+    }
+    #endif
 
     func testWateringLimitedToThreePerDay() {
         GameEngine.submit(task: rope, value: 100, ctx: ctx, now: day(0))
