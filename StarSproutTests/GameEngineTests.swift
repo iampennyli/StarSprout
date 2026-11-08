@@ -154,6 +154,12 @@ final class GameEngineTests: XCTestCase {
         XCTAssertEqual(coins, 500 - 40 - 80 - 50)
     }
 
+    func testDecorCatalogIdsUniqueAndEverySlotStocked() {
+        let ids = DecorCatalog.all.map(\.id)
+        XCTAssertEqual(ids.count, Set(ids).count)
+        for slot in DecorSlot.allCases { XCTAssertFalse(DecorCatalog.items(in: slot).isEmpty, slot.rawValue) }
+    }
+
     func testWateringLimitedToThreePerDay() {
         GameEngine.submit(task: rope, value: 100, ctx: ctx, now: day(0))
         for _ in 0..<3 {

@@ -89,7 +89,8 @@ enum DemoMode {
         ctx.insert(RedemptionRequest(currency: .money, amount: 5))
 
         // 用攒下的金币买几件装饰
-        for id in ["ground.mushroom", "hat.star", "sky.moon", "ornament.lights"] {
+        ctx.insert(LedgerEntry(currency: .coins, amount: 300, reason: "演示金币", date: today))
+        for id in ["ground.flowers", "hat.star", "sky.moon", "ornament.lights", "landmark.tent", "pet.duck"] {
             GameEngine.buyDecoration(id, ctx: ctx, now: cal.date(byAdding: .hour, value: 10, to: today)!)
         }
 

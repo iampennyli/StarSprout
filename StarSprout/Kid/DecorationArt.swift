@@ -23,6 +23,24 @@ struct DecorArt: View {
         case "sky.rainbow": Rainbow(width: 70)
         case "ring.gold": RingIcon(style: .gold)
         case "ring.rainbow": RingIcon(style: .rainbow)
+        case "ring.ice": RingIcon(style: .ice)
+        case "hat.bow": Bow()
+        case "hat.santa": SantaHat()
+        case "ornament.chime", "ornament.stars":
+            OrnamentArt(id: id, size: CGSize(width: 90, height: 60)).frame(width: 70, height: 56)
+        case "ground.flowers": FlowerBush()
+        case "ground.pumpkin": Pumpkin()
+        case "ground.pond": Pond()
+        case "landmark.tent": Tent()
+        case "landmark.windmill": Windmill()
+        case "landmark.lighthouse": Lighthouse()
+        case "landmark.rocket": Rocket()
+        case "pet.duck": Duck()
+        case "pet.cat": Cat()
+        case "pet.penguin": Penguin()
+        case "sky.cloud": Cloud()
+        case "sky.meteor": Meteors()
+        case "sky.balloon": Balloon()
         default: Image(systemName: "questionmark").foregroundStyle(Theme.muted)
         }
     }
@@ -41,6 +59,22 @@ struct DecorArt: View {
         case "sky.moon": return CGSize(width: 52, height: 52)
         case "sky.satellite": return CGSize(width: 64, height: 34)
         case "sky.rainbow": return CGSize(width: 70, height: 38)
+        case "hat.bow": return CGSize(width: 42, height: 26)
+        case "hat.santa": return CGSize(width: 40, height: 40)
+        case "ornament.chime", "ornament.stars": return CGSize(width: 70, height: 56)
+        case "ground.flowers": return CGSize(width: 46, height: 30)
+        case "ground.pumpkin": return CGSize(width: 40, height: 34)
+        case "ground.pond": return CGSize(width: 64, height: 26)
+        case "landmark.tent": return CGSize(width: 58, height: 48)
+        case "landmark.windmill": return CGSize(width: 62, height: 86)
+        case "landmark.lighthouse": return CGSize(width: 36, height: 92)
+        case "landmark.rocket": return CGSize(width: 40, height: 84)
+        case "pet.duck": return CGSize(width: 36, height: 32)
+        case "pet.cat": return CGSize(width: 40, height: 40)
+        case "pet.penguin": return CGSize(width: 32, height: 42)
+        case "sky.cloud": return CGSize(width: 72, height: 36)
+        case "sky.meteor": return CGSize(width: 90, height: 56)
+        case "sky.balloon": return CGSize(width: 46, height: 66)
         default: return CGSize(width: 70, height: 30)
         }
     }
@@ -122,6 +156,21 @@ struct OrnamentArt: View {
     var body: some View {
         switch id {
         case "ornament.lights": lights
+        case "ornament.chime":
+            chime(x: 0.76, y: 0.72, scale: size.width / 130)
+        case "ornament.stars":
+            ZStack {
+                ForEach(Array([(0.22, 0.62, 18.0), (0.42, 0.78, 26.0), (0.62, 0.74, 14.0), (0.82, 0.60, 22.0)].enumerated()), id: \.offset) { _, s in
+                    let k = size.width / 160
+                    VStack(spacing: 0) {
+                        Rectangle().fill(Color(hex: 0xE8D9A8)).frame(width: 1, height: s.2 * k)
+                        StarShape(points: 5, inner: 0.45).fill(Theme.gold)
+                            .frame(width: 13 * k, height: 13 * k)
+                            .shadow(color: Theme.gold.opacity(0.9), radius: 4 * k)
+                    }
+                    .position(x: s.0 * size.width, y: s.1 * size.height + (s.2 * k) / 2)
+                }
+            }
         case "ornament.lantern":
             ZStack {
                 lanternAt(x: 0.80, y: 0.70, scale: size.width / 140)
@@ -156,6 +205,21 @@ struct OrnamentArt: View {
             }
         }
         .frame(width: w, height: h)
+    }
+
+    private func chime(x: CGFloat, y: CGFloat, scale k: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(Color(hex: 0x6B3A1E)).frame(width: 1.2 * k, height: 8 * k)
+            Capsule().fill(Color(hex: 0xC9CDF0)).frame(width: 24 * k, height: 3 * k)
+            HStack(alignment: .top, spacing: 3 * k) {
+                ForEach([14.0, 20, 16, 22], id: \.self) { h in
+                    Capsule().fill(LinearGradient(colors: [Color(hex: 0xEAF6FF), Color(hex: 0x9FD8F0)], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 3 * k, height: h * k)
+                }
+            }
+            Circle().fill(Theme.pink).frame(width: 5 * k).padding(.top, 2 * k)
+        }
+        .position(x: x * size.width, y: y * size.height + 22 * k)
     }
 
     private func lanternAt(x: CGFloat, y: CGFloat, scale: CGFloat) -> some View {
@@ -321,7 +385,7 @@ struct Rainbow: View {
 
 // MARK: - 星环
 
-enum RingStyle { case standard, gold, rainbow }
+enum RingStyle { case standard, gold, rainbow, ice }
 
 /// 星环。`back` 画后半圈（压在星球后面），否则画前半圈
 struct PlanetRing: View {
@@ -342,6 +406,9 @@ struct PlanetRing: View {
         case .gold:
             return LinearGradient(colors: [Color(hex: 0xC98314), Color(hex: 0xFFF1A8), Theme.gold, Color(hex: 0xC98314)],
                                   startPoint: .leading, endPoint: .trailing)
+        case .ice:
+            return LinearGradient(colors: [Color(hex: 0x9FE7FF).opacity(0.6), .white, Color(hex: 0x7CD6F5), .white, Color(hex: 0x9FE7FF).opacity(0.6)],
+                                  startPoint: .leading, endPoint: .trailing)
         case .rainbow:
             return LinearGradient(colors: [Color(hex: 0xFF6B6B), Color(hex: 0xFFE066), Color(hex: 0x8CE99A),
                                            Color(hex: 0x66D9E8), Color(hex: 0xC490F5)],
@@ -353,6 +420,7 @@ struct PlanetRing: View {
         switch id {
         case "ring.gold": return .gold
         case "ring.rainbow": return .rainbow
+        case "ring.ice": return .ice
         default: return .standard
         }
     }
@@ -369,6 +437,286 @@ private struct RingIcon: View {
             PlanetRing(style: style, back: false).frame(width: 66, height: 18)
         }
         .frame(width: 70, height: 34)
+    }
+}
+
+// MARK: - 新增装饰
+
+private struct Bow: View {
+    var body: some View {
+        let pink = LinearGradient(colors: [Color(hex: 0xFFA6D6), Theme.pink], startPoint: .top, endPoint: .bottom)
+        ZStack {
+            Ellipse().fill(pink).frame(width: 20, height: 16).rotationEffect(.degrees(-18)).offset(x: -11, y: -2)
+            Ellipse().fill(pink).frame(width: 20, height: 16).rotationEffect(.degrees(18)).offset(x: 11, y: -2)
+            Capsule().fill(Theme.pink).frame(width: 5, height: 12).rotationEffect(.degrees(20)).offset(x: -5, y: 9)
+            Capsule().fill(Theme.pink).frame(width: 5, height: 12).rotationEffect(.degrees(-20)).offset(x: 5, y: 9)
+            Circle().fill(Color(hex: 0xE2559F)).frame(width: 9)
+        }
+        .frame(width: 42, height: 26)
+    }
+}
+
+private struct SantaHat: View {
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            SantaShape().fill(LinearGradient(colors: [Color(hex: 0xFF5A5A), Color(hex: 0xC92A2A)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 34, height: 32).padding(.bottom, 6)
+            Capsule().fill(.white).frame(width: 38, height: 9)
+            Circle().fill(.white).frame(width: 9).offset(x: 17, y: -26)
+        }
+        .frame(width: 40, height: 40)
+    }
+}
+
+private struct SantaShape: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX, y: r.maxY))
+        p.addQuadCurve(to: CGPoint(x: r.maxX, y: r.minY + r.height * 0.1), control: CGPoint(x: r.minX + r.width * 0.2, y: r.minY))
+        p.addQuadCurve(to: CGPoint(x: r.maxX - r.width * 0.05, y: r.maxY), control: CGPoint(x: r.maxX - r.width * 0.15, y: r.midY))
+        p.closeSubpath()
+        return p
+    }
+}
+
+private struct FlowerBush: View {
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Blobs(circles: [.init(0.3, 0.6, 0.22), .init(0.55, 0.5, 0.25), .init(0.78, 0.62, 0.2)])
+                .fill(LinearGradient(colors: [Color(hex: 0x7EDC95), Color(hex: 0x3FA866)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 46, height: 30)
+            Blossom(petal: Theme.pink, size: 13).offset(x: -12, y: -14)
+            Blossom(petal: Theme.gold, size: 12).offset(x: 4, y: -19)
+            Blossom(petal: Color(hex: 0xB59BFF), size: 12).offset(x: 15, y: -10)
+            Blossom(petal: .white, size: 10).offset(x: -2, y: -6)
+        }
+        .frame(width: 46, height: 30)
+    }
+}
+
+private struct Pumpkin: View {
+    var body: some View {
+        let orange = LinearGradient(colors: [Color(hex: 0xFFB45C), Color(hex: 0xE8771F)], startPoint: .top, endPoint: .bottom)
+        ZStack(alignment: .bottom) {
+            Ellipse().fill(orange).frame(width: 20, height: 26).offset(x: -10)
+            Ellipse().fill(orange).frame(width: 20, height: 26).offset(x: 10)
+            Ellipse().fill(LinearGradient(colors: [Color(hex: 0xFFC27A), Color(hex: 0xF08A2C)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 22, height: 28)
+            Capsule().fill(Color(hex: 0x5E8C3A)).frame(width: 4, height: 9).rotationEffect(.degrees(15)).offset(x: 1, y: -24)
+            LeafShape().fill(Color(hex: 0x6ECF7E)).frame(width: 12, height: 6).offset(x: 8, y: -27)
+        }
+        .frame(width: 40, height: 34)
+    }
+}
+
+private struct Pond: View {
+    var body: some View {
+        ZStack {
+            Ellipse().fill(Color(hex: 0x8A6A4A)).frame(width: 64, height: 24)
+            Ellipse().fill(LinearGradient(colors: [Color(hex: 0x9BE7FF), Color(hex: 0x3BA7D9)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 56, height: 18)
+            Ellipse().fill(.white.opacity(0.5)).frame(width: 14, height: 3).offset(x: -10, y: -3)
+            Ellipse().fill(Color(hex: 0x5ED488)).frame(width: 14, height: 6).offset(x: 12, y: 2)
+            Blossom(petal: Theme.pink, size: 7).offset(x: 13, y: 0)
+        }
+        .frame(width: 64, height: 26)
+    }
+}
+
+private struct Tent: View {
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Triangle().fill(LinearGradient(colors: [Color(hex: 0xFFB35C), Color(hex: 0xE87A2E)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 54, height: 40)
+            Triangle().fill(Color(hex: 0x6B3A1E)).frame(width: 16, height: 20)
+            Triangle().fill(Color(hex: 0xFFE3B8).opacity(0.5)).frame(width: 4, height: 40).offset(x: -1)
+            Rectangle().fill(Color(hex: 0x8A5A36)).frame(width: 1.5, height: 14).offset(y: -38)
+            Triangle().fill(Theme.pink).frame(width: 10, height: 7).rotationEffect(.degrees(90)).offset(x: 5, y: -46)
+        }
+        .frame(width: 58, height: 48)
+    }
+}
+
+private struct Windmill: View {
+    @State private var spin = false
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Trapezoid().fill(LinearGradient(colors: [Color(hex: 0xF6E7CF), Color(hex: 0xD9BE98)], startPoint: .leading, endPoint: .trailing))
+                .frame(width: 30, height: 52)
+            UnevenRoundedRectangle(topLeadingRadius: 5, topTrailingRadius: 5).fill(Color(hex: 0x8A5A36))
+                .frame(width: 9, height: 13)
+            Triangle().fill(Color(hex: 0xD9483E)).frame(width: 30, height: 14).offset(y: -50)
+            ZStack {
+                ForEach(0..<4, id: \.self) { i in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(LinearGradient(colors: [.white, Color(hex: 0xDDE4FF)], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 8, height: 26)
+                        .offset(y: -15)
+                        .rotationEffect(.degrees(Double(i) * 90))
+                }
+                Circle().fill(Color(hex: 0x8A5A36)).frame(width: 7)
+            }
+            .rotationEffect(.degrees(spin ? 360 : 0))
+            .animation(.linear(duration: 6).repeatForever(autoreverses: false), value: spin)
+            .offset(y: -50)
+        }
+        .frame(width: 62, height: 86)
+        .onAppear { spin = true }
+    }
+}
+
+private struct Trapezoid: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX + r.width * 0.2, y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX - r.width * 0.2, y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX, y: r.maxY))
+        p.addLine(to: CGPoint(x: r.minX, y: r.maxY))
+        p.closeSubpath()
+        return p
+    }
+}
+
+private struct Lighthouse: View {
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Trapezoid().fill(.white).frame(width: 26, height: 66)
+            VStack(spacing: 12) {
+                ForEach(0..<3, id: \.self) { _ in Rectangle().fill(Color(hex: 0xE24A4A)).frame(height: 8) }
+            }
+            .frame(width: 26, height: 66)
+            .mask(Trapezoid().frame(width: 26, height: 66))
+            RoundedRectangle(cornerRadius: 2).fill(Color(hex: 0x3A3F80)).frame(width: 26, height: 4).offset(y: -66)
+            ZStack {
+                Circle().fill(Theme.gold.opacity(0.4)).frame(width: 30).blur(radius: 5)
+                RoundedRectangle(cornerRadius: 3).fill(Color(hex: 0xFFE38A)).frame(width: 14, height: 12)
+            }
+            .offset(y: -72)
+            Triangle().fill(Color(hex: 0xE24A4A)).frame(width: 20, height: 10).offset(y: -84)
+        }
+        .frame(width: 36, height: 92)
+    }
+}
+
+private struct Rocket: View {
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            // 尾焰
+            Ellipse().fill(LinearGradient(colors: [Theme.gold, Color(hex: 0xFF7A3A).opacity(0)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 10, height: 14).offset(y: 6)
+            // 尾翼
+            Triangle().fill(Color(hex: 0xE24A4A)).frame(width: 12, height: 18).rotationEffect(.degrees(-25)).offset(x: -12, y: -4)
+            Triangle().fill(Color(hex: 0xE24A4A)).frame(width: 12, height: 18).rotationEffect(.degrees(25)).offset(x: 12, y: -4)
+            // 机身
+            Capsule().fill(LinearGradient(colors: [.white, Color(hex: 0xC9CDF0)], startPoint: .leading, endPoint: .trailing))
+                .frame(width: 22, height: 64).offset(y: -6)
+            Circle().fill(Theme.cyan).frame(width: 10).overlay(Circle().stroke(Color(hex: 0x3A3F80), lineWidth: 2)).offset(y: -46)
+            UnevenRoundedRectangle(topLeadingRadius: 11, topTrailingRadius: 11).fill(Color(hex: 0xE24A4A))
+                .frame(width: 22, height: 14).offset(y: -56)
+        }
+        .frame(width: 40, height: 84)
+    }
+}
+
+private struct Duck: View {
+    var body: some View {
+        let yellow = LinearGradient(colors: [Color(hex: 0xFFE680), Color(hex: 0xF5C02E)], startPoint: .top, endPoint: .bottom)
+        ZStack {
+            Ellipse().fill(yellow).frame(width: 30, height: 18).offset(x: -2, y: 7)
+            Circle().fill(yellow).frame(width: 17).offset(x: 6, y: -6)
+            Circle().fill(Color(hex: 0x23264F)).frame(width: 3).offset(x: 9, y: -8)
+            Ellipse().fill(Color(hex: 0xFF9A3A)).frame(width: 9, height: 5).offset(x: 16, y: -4)
+            Ellipse().fill(Color(hex: 0xF2B21C)).frame(width: 12, height: 7).rotationEffect(.degrees(-15)).offset(x: -6, y: 5)
+        }
+        .frame(width: 36, height: 32)
+    }
+}
+
+private struct Cat: View {
+    var body: some View {
+        let fur = LinearGradient(colors: [Color(hex: 0xFFB866), Color(hex: 0xE8892E)], startPoint: .top, endPoint: .bottom)
+        let ink = Color(hex: 0x23264F)
+        ZStack {
+            // 尾巴
+            Capsule().fill(Color(hex: 0xE8892E)).frame(width: 6, height: 22).rotationEffect(.degrees(40)).offset(x: 14, y: 6)
+            Ellipse().fill(fur).frame(width: 26, height: 22).offset(y: 9)
+            Circle().fill(fur).frame(width: 22).offset(y: -7)
+            Triangle().fill(Color(hex: 0xE8892E)).frame(width: 8, height: 9).rotationEffect(.degrees(-15)).offset(x: -7, y: -18)
+            Triangle().fill(Color(hex: 0xE8892E)).frame(width: 8, height: 9).rotationEffect(.degrees(15)).offset(x: 7, y: -18)
+            SmileArc().stroke(ink, style: StrokeStyle(lineWidth: 1.6, lineCap: .round)).frame(width: 5, height: 2).offset(x: -4, y: -8)
+            SmileArc().stroke(ink, style: StrokeStyle(lineWidth: 1.6, lineCap: .round)).frame(width: 5, height: 2).offset(x: 4, y: -8)
+            Ellipse().fill(Theme.pink).frame(width: 3, height: 2).offset(y: -4)
+            Ellipse().fill(Color(hex: 0xFFF1DC)).frame(width: 12, height: 9).offset(y: 12)
+        }
+        .frame(width: 40, height: 40)
+    }
+}
+
+private struct Penguin: View {
+    var body: some View {
+        ZStack {
+            Ellipse().fill(Color(hex: 0x2E3352)).frame(width: 26, height: 36).offset(y: 2)
+            Ellipse().fill(.white).frame(width: 17, height: 26).offset(y: 5)
+            HStack(spacing: 6) {
+                Circle().fill(Color(hex: 0x23264F)).frame(width: 3.5)
+                Circle().fill(Color(hex: 0x23264F)).frame(width: 3.5)
+            }
+            .offset(y: -8)
+            Triangle().fill(Color(hex: 0xFFA23A)).frame(width: 6, height: 5).rotationEffect(.degrees(180)).offset(y: -3)
+            Ellipse().fill(Color(hex: 0xFFA23A)).frame(width: 8, height: 4).offset(x: -6, y: 19)
+            Ellipse().fill(Color(hex: 0xFFA23A)).frame(width: 8, height: 4).offset(x: 6, y: 19)
+            Ellipse().fill(Theme.pink.opacity(0.5)).frame(width: 5, height: 3).offset(x: -8, y: -4)
+            Ellipse().fill(Theme.pink.opacity(0.5)).frame(width: 5, height: 3).offset(x: 8, y: -4)
+        }
+        .frame(width: 32, height: 42)
+    }
+}
+
+private struct Cloud: View {
+    var body: some View {
+        Blobs(circles: [.init(0.25, 0.65, 0.16), .init(0.45, 0.45, 0.22), .init(0.68, 0.55, 0.18), .init(0.85, 0.72, 0.11)])
+            .fill(LinearGradient(colors: [.white, Color(hex: 0xD9E0FF)], startPoint: .top, endPoint: .bottom))
+            .frame(width: 72, height: 36)
+            .shadow(color: .white.opacity(0.3), radius: 6)
+    }
+}
+
+private struct Meteors: View {
+    var body: some View {
+        ZStack {
+            ForEach(Array([(-20.0, -12.0, 1.0), (14.0, 4.0, 0.75), (-4.0, 18.0, 0.6)].enumerated()), id: \.offset) { _, m in
+                HStack(spacing: 0) {
+                    Capsule().fill(LinearGradient(colors: [.white.opacity(0), .white.opacity(0.8)], startPoint: .leading, endPoint: .trailing))
+                        .frame(width: 44 * m.2, height: 3)
+                    StarShape(points: 4, inner: 0.4).fill(Color(hex: 0xFFF1A8)).frame(width: 12 * m.2, height: 12 * m.2)
+                        .shadow(color: Theme.gold, radius: 4)
+                }
+                .rotationEffect(.degrees(28))
+                .offset(x: m.0, y: m.1)
+            }
+        }
+        .frame(width: 90, height: 56)
+    }
+}
+
+private struct Balloon: View {
+    var body: some View {
+        ZStack(alignment: .top) {
+            ZStack {
+                Ellipse().fill(Color(hex: 0xFF6B6B)).frame(width: 40, height: 44)
+                Ellipse().fill(Color(hex: 0xFFE066)).frame(width: 24, height: 44)
+                Ellipse().fill(Color(hex: 0x66D9E8)).frame(width: 9, height: 44)
+            }
+            .clipShape(Ellipse())
+            Path { p in
+                p.move(to: CGPoint(x: 11, y: 38)); p.addLine(to: CGPoint(x: 17, y: 54))
+                p.move(to: CGPoint(x: 35, y: 38)); p.addLine(to: CGPoint(x: 29, y: 54))
+            }
+            .stroke(Color(hex: 0xC9CDF0), lineWidth: 1)
+            .frame(width: 46, height: 66)
+            RoundedRectangle(cornerRadius: 2).fill(Color(hex: 0xB07A4F)).frame(width: 14, height: 10).offset(y: 54)
+        }
+        .frame(width: 46, height: 66)
     }
 }
 

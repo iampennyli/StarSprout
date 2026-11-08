@@ -114,15 +114,8 @@ struct TodayView: View {
         }()
         return Button { tab = .planet } label: {
             HStack(spacing: 12) {
-                ZStack(alignment: .bottom) {
-                    PlanetBody(stage: stage, diameter: 64).offset(y: 24)
-                    TreeView(stage: stage, mood: mood,
-                             hat: GameEngine.equippedDecorations(decorations)[.hat],
-                             ornament: stage >= 3 ? GameEngine.equippedDecorations(decorations)[.ornament] : nil)
-                        .scaleEffect(0.24).frame(width: 58, height: 62)
-                }
-                .frame(width: 72, height: 72)
-                .clipped()
+                IslandThumbnail(stage: stage, mood: mood, decor: GameEngine.equippedDecorations(decorations))
+                    .frame(width: 72, height: 80)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("我的星球 · \(Economy.stageNames[stage - 1])").font(.headline)
                     Text(hint).font(.footnote).foregroundStyle(Theme.muted)

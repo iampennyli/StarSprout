@@ -10,7 +10,10 @@ struct PlanetView: View {
     @Query private var settingsList: [AppSettings]
     @Query private var decorations: [OwnedDecoration]
     @State private var showShop = false
-    @State private var satelliteFloat = false
+    @State private var islandAngle: Double = 0
+    @GestureState private var dragAngle: Double = 0
+    @State private var floatUp = false
+    @AppStorage("didHintIslandDrag") private var didHintDrag = false
 
     @State private var wiggleTick = 0
     @State private var pulseTick = 0
@@ -81,7 +84,7 @@ struct PlanetView: View {
     private var statusLine: String {
         if let m = mood.message { return m }
         let rope = Int(checkIns.filter { $0.kind == .rope && (!$0.suspicious || $0.verified) }.reduce(0) { $0 + $1.value })
-        return "这棵树陪你跳了 \(rope.formatted()) 个 · 点一点小树试试"
+        return didHintDrag ? "这棵树陪你跳了 \(rope.formatted()) 个 · 点一点小树试试" : "左右拖动小岛转一转 · 点一点小树试试"
     }
 
     private func chip(icon: String, text: String, color: Color) -> some View {
@@ -99,55 +102,48 @@ struct PlanetView: View {
 
     private var scene: some View {
         ZStack(alignment: .bottom) {
-            Circle().fill(Theme.leaf.opacity(0.08)).frame(width: 260, height: 260).padding(.bottom, 150)
-            skyBackLayer
-            // 星环后半圈在星球后面，前半圈压在星球前面，看起来是环绕而不是穿过
-            PlanetRing(style: PlanetRing.style(for: decor[.ring]), back: true)
-                .frame(width: 380, height: 70).padding(.bottom, 26)
-            PlanetBody(stage: stage).offset(y: 200)
-            PlanetRing(style: PlanetRing.style(for: decor[.ring]), back: false)
-                .frame(width: 380, height: 70).padding(.bottom, 26)
-            GrassCap(stage: stage).padding(.bottom, stage >= 3 ? 122 : 128)
-
-            Button(action: tapTree) {
-                TreeView(stage: stage, mood: mood, hat: decor[.hat], ornament: stage >= 3 ? decor[.ornament] : nil)
-                    .rotationEffect(.degrees(mood == .normal ? (sway ? 1 : -1) : 0), anchor: .bottom)
-                    .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: sway)
-                    .phaseAnimator([0.0, -5, 4, -2, 0], trigger: wiggleTick) { v, angle in
-                        v.rotationEffect(.degrees(angle), anchor: .bottom)
-                    } animation: { _ in .easeInOut(duration: 0.16) }
-                    .phaseAnimator([1.0, 1.1, 1.0], trigger: pulseTick) { v, s in
-                        v.scaleEffect(s, anchor: .bottom)
-                    } animation: { _ in .spring(response: 0.3, dampingFraction: 0.45) }
-            }
-            .buttonStyle(.plain)
-            .padding(.bottom, 134)
-            .accessibilityLabel("摸摸小树")
-
-            if let ground = decor[.ground] {
-                DecorArt(id: ground)
-                    .offset(x: -86)
-                    .padding(.bottom, 132)
-                    .allowsHitTesting(false)
-            }
-
-            if stage >= 5 {
+            IslandScene(stage: stage, decor: decor, angle: islandAngle + dragAngle, showBunny: stage >= 5) {
+                Button(action: tapTree) {
+                    TreeView(stage: stage, mood: mood, hat: decor[.hat], ornament: stage >= 3 ? decor[.ornament] : nil)
+                        .rotationEffect(.degrees(mood == .normal ? (sway ? 1 : -1) : 0), anchor: .bottom)
+                        .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: sway)
+                        .phaseAnimator([0.0, -5, 4, -2, 0], trigger: wiggleTick) { v, angle in
+                            v.rotationEffect(.degrees(angle), anchor: .bottom)
+                        } animation: { _ in .easeInOut(duration: 0.16) }
+                        .phaseAnimator([1.0, 1.1, 1.0], trigger: pulseTick) { v, s in
+                            v.scaleEffect(s, anchor: .bottom)
+                        } animation: { _ in .spring(response: 0.3, dampingFraction: 0.45) }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("摸摸小树")
+            } bunny: {
                 Button { bunnyTick += 1; SoundManager.shared.play(.bunny) } label: {
                     BunnyView()
                         .phaseAnimator([0.0, -24, 0], trigger: bunnyTick) { v, y in v.offset(y: y) }
                 }
                 .buttonStyle(.plain)
-                .offset(x: 84)
-                .padding(.bottom, 136)
                 .accessibilityLabel("摸摸小兔子")
             }
+            // 整座小岛轻轻上下漂浮
+            .offset(y: floatUp ? -4 : 4)
+            .animation(.easeInOut(duration: 3.2).repeatForever(autoreverses: true), value: floatUp)
 
             effectsLayer
         }
         .frame(maxWidth: .infinity)
         .frame(height: 430)
-        .overlay(alignment: .topTrailing) { skyFrontLayer }
         .clipped()
+        .contentShape(Rectangle())
+        // 左右拖动小岛转一转
+        .gesture(
+            DragGesture(minimumDistance: 12)
+                .updating($dragAngle) { value, state, _ in state = Double(value.translation.width) / 110 }
+                .onEnded { value in
+                    islandAngle += Double(value.translation.width) / 110
+                    if !didHintDrag { didHintDrag = true }
+                }
+        )
+        .animation(.interactiveSpring(response: 0.25, dampingFraction: 0.85), value: dragAngle)
         .overlay(alignment: .topLeading) {
             if let bubble {
                 Text(bubble)
@@ -159,31 +155,7 @@ struct PlanetView: View {
                     .transition(.scale(scale: 0.5, anchor: .bottomTrailing).combined(with: .opacity))
             }
         }
-    }
-
-    /// 天空装饰：彩虹在小树后面，月亮 / 卫星挂在天上
-    @ViewBuilder
-    private var skyBackLayer: some View {
-        if decor[.sky] == "sky.rainbow" {
-            Rainbow(width: 330).opacity(0.75).padding(.bottom, 150)
-        }
-    }
-
-    @ViewBuilder
-    private var skyFrontLayer: some View {
-        switch decor[.sky] {
-        case "sky.moon":
-            DecorArt(id: "sky.moon").padding(.top, 34).padding(.trailing, 26)
-        case "sky.satellite":
-            DecorArt(id: "sky.satellite")
-                .rotationEffect(.degrees(-14))
-                .offset(y: satelliteFloat ? -6 : 6)
-                .animation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true), value: satelliteFloat)
-                .padding(.top, 44).padding(.trailing, 22)
-                .onAppear { satelliteFloat = true }
-        default:
-            EmptyView()
-        }
+        .onAppear { floatUp = true }
     }
 
     @ViewBuilder
@@ -194,7 +166,7 @@ struct PlanetView: View {
             if let floatText { FloatingText(text: floatText) }
         }
         .frame(width: 300, height: 300)
-        .padding(.bottom, 130)
+        .padding(.bottom, 430 - Island.center.y)
         .allowsHitTesting(false)
     }
 

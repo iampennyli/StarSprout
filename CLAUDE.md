@@ -30,7 +30,8 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 | `Engine/Economy.swift` | **所有数值的唯一出处**（水、金币、施肥、阶段门槛）。调数值只改这里 |
 | `Engine/GameEngine.swift` | **所有奖励与养成规则**。界面只调用引擎，不自己算账 |
 | `Engine/Medals.swift` | 勋章目录与判定 |
-| `Engine/Decorations.swift` | 装饰目录（5 个位置、13 件、价格和解锁阶段）；购买 / 换上 / 取下规则在 GameEngine |
+| `Engine/Decorations.swift` | 装饰目录（7 个位置、31 件、价格和解锁阶段）；购买 / 换上 / 取下规则在 GameEngine。新增装饰 = 目录加一条 + `Kid/DecorationArt.swift` 画一个 |
+| `Kid/IslandArt.swift` | 2.5D 漂浮小岛场景：顶面物体按极坐标摆放、按深度排序、可拖动旋转；星球页 / 商店 / 首页缩略共用 |
 | `Engine/NotificationManager.swift` | 本地通知，重排未来 7 天，当天已运动则跳过 |
 | `Engine/SoundManager.swift` | 星球页背景音乐（无缝循环、淡入淡出）+ 音效；`.ambient` 会话遵从静音键；开关在 UserDefaults |
 | `Resources/Sounds/` | 由 `scripts/sound/generate_sounds.py` 程序合成的音频，**不要手工替换**，改脚本参数后重新生成 |
@@ -64,7 +65,7 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 
 ## 已知待办
 
-- 美术：树（7 阶段 × 4 状态，带表情）、星球、草地、小兔子已用 SwiftUI 矢量重画（`Kid/TreeView.swift`、`Kid/PlanetArt.swift`，插画专用色写在这两个文件里）。`-screen trees` 是美术检查页。将来要更细腻的动效再考虑 Lottie / Rive
+- 美术：树（7 阶段 × 4 状态，带表情）、2.5D 漂浮小岛、装饰、小兔子都用 SwiftUI 矢量绘制（`Kid/TreeView.swift`、`Kid/IslandArt.swift`、`Kid/DecorationArt.swift`，插画专用色写在这些文件里）。`-screen trees` / `-screen decor` 是美术检查页。将来要更细腻的动效再考虑 Lottie / Rive
 - 分享卡二维码、App 正式名称、隐私政策和儿童个人信息保护规则正文
 - 第二阶段：新种子、扩建、星果兑换真实奖励、屏幕时间自动管控（Family Controls）
 - 界面已用 `scripts/screenshots.sh` 逐页截图检查过一轮（2026-11-08）；美术替换后需再过一遍

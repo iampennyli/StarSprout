@@ -62,13 +62,8 @@ struct TreeGallery: View {
                 HStack(spacing: 2) {
                     Text("\(stage)").font(.caption.bold()).foregroundStyle(Theme.muted).frame(width: 14)
                     ForEach(moods, id: \.self) { mood in
-                        ZStack(alignment: .bottom) {
-                            // 和星球页同样的构图，整体缩小到 0.28
-                            PlanetBody(stage: stage, diameter: 95).offset(y: 56)
-                            GrassCap(stage: stage).scaleEffect(0.28, anchor: .bottom).padding(.bottom, 34)
-                            TreeView(stage: stage, mood: mood).scaleEffect(0.28, anchor: .bottom).padding(.bottom, 38)
-                        }
-                        .frame(width: 92, height: 110, alignment: .bottom)
+                        IslandThumbnail(stage: stage, mood: mood, decor: [:])
+                        .frame(width: 92, height: 110)
                         .clipped()
                         .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
                     }
@@ -91,26 +86,26 @@ private struct DemoShop: View {
 /// 美术检查页：上面三种搭配的星球，下面所有装饰的单品图
 struct DecorGallery: View {
     private let combos: [[DecorSlot: String]] = [
-        [.hat: "hat.crown", .ornament: "ornament.lantern", .ground: "ground.house", .sky: "sky.rainbow", .ring: "ring.gold"],
-        [.hat: "hat.bird", .ornament: "ornament.lights", .ground: "ground.swing", .sky: "sky.satellite", .ring: "ring.rainbow"],
-        [.hat: "hat.star", .ground: "ground.mushroom", .sky: "sky.moon"],
+        [.hat: "hat.crown", .ornament: "ornament.lantern", .ground: "ground.pond", .landmark: "ground.house", .pet: "pet.cat", .sky: "sky.rainbow", .ring: "ring.gold"],
+        [.hat: "hat.santa", .ornament: "ornament.lights", .ground: "ground.swing", .landmark: "landmark.windmill", .pet: "pet.penguin", .sky: "sky.balloon", .ring: "ring.ice"],
+        [.hat: "hat.bow", .ornament: "ornament.stars", .ground: "ground.flowers", .landmark: "landmark.rocket", .pet: "pet.duck", .sky: "sky.meteor", .ring: "ring.rainbow"],
     ]
     var body: some View {
         VStack(spacing: 8) {
             HStack(spacing: 4) {
                 MiniPlanetScene(stage: 5, mood: .normal, decor: combos[0])
                 MiniPlanetScene(stage: 7, mood: .normal, decor: combos[1])
-                MiniPlanetScene(stage: 3, mood: .normal, decor: combos[2])
+                MiniPlanetScene(stage: 6, mood: .normal, decor: combos[2])
             }
-            .frame(height: 240)
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
+            .frame(height: 150)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 6), spacing: 4) {
                 ForEach(DecorCatalog.all) { item in
                     let n = DecorArt.naturalSize(item.id)
                     VStack(spacing: 2) {
-                        DecorArt(id: item.id).scaleEffect(min(70 / n.width, 60 / n.height, 1.6)).frame(width: 80, height: 66)
+                        DecorArt(id: item.id).scaleEffect(min(50 / n.width, 46 / n.height, 1.2)).frame(width: 56, height: 50)
                         Text(item.name).font(.caption2).foregroundStyle(Theme.muted)
                     }
-                    .frame(maxWidth: .infinity).padding(.vertical, 6)
+                    .frame(maxWidth: .infinity).padding(.vertical, 4)
                     .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
                 }
             }

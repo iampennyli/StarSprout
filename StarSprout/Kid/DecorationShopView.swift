@@ -97,6 +97,7 @@ struct DecorationShopView: View {
     // MARK: Slots
 
     private var slotPicker: some View {
+        ScrollView(.horizontal) {
         HStack(spacing: 6) {
             ForEach(DecorSlot.allCases) { s in
                 Button {
@@ -105,7 +106,8 @@ struct DecorationShopView: View {
                     Text(s.title)
                         .font(.subheadline.bold())
                         .foregroundStyle(slot == s ? Theme.ink : .white)
-                        .frame(maxWidth: .infinity, minHeight: 36)
+                        .padding(.horizontal, 16)
+                        .frame(minHeight: 36)
                         .background(slot == s ? Theme.lime : Theme.card, in: Capsule())
                         .overlay(alignment: .topTrailing) {
                             if equipped[s] != nil {
@@ -117,6 +119,8 @@ struct DecorationShopView: View {
             }
         }
         .padding(.horizontal, 20)
+        }
+        .scrollIndicators(.hidden)
         .padding(.top, 6)
     }
 
@@ -238,46 +242,22 @@ struct DecorationShopView: View {
     }
 }
 
-/// 不可交互的星球缩略场景，和星球页同样的构图，用于商店预览
+/// 商店预览用的小岛（可以拖动转一转看看装饰的位置）
 struct MiniPlanetScene: View {
     let stage: Int
     let mood: TreeMood
     let decor: [DecorSlot: String]
+    @State private var base: Double = 0
+    @GestureState private var drag: Double = 0
+    private var angle: Double { base + drag }
 
     var body: some View {
-        let ring = PlanetRing.style(for: decor[.ring])
-        GeometryReader { geo in
-            let scale = min(geo.size.height / 430, geo.size.width / 380)
-            ZStack(alignment: .bottom) {
-                Circle().fill(Theme.leaf.opacity(0.08)).frame(width: 260, height: 260).padding(.bottom, 150)
-                if decor[.sky] == "sky.rainbow" {
-                    Rainbow(width: 330).opacity(0.75).padding(.bottom, 150)
-                }
-                PlanetRing(style: ring, back: true).frame(width: 380, height: 70).padding(.bottom, 26)
-                PlanetBody(stage: stage).offset(y: 200)
-                PlanetRing(style: ring, back: false).frame(width: 380, height: 70).padding(.bottom, 26)
-                GrassCap(stage: stage).padding(.bottom, stage >= 3 ? 122 : 128)
-                TreeView(stage: stage, mood: mood, hat: decor[.hat], ornament: stage >= 3 ? decor[.ornament] : nil)
-                    .padding(.bottom, 134)
-                if let ground = decor[.ground] {
-                    DecorArt(id: ground).offset(x: -86).padding(.bottom, 132)
-                }
-                if stage >= 5 {
-                    BunnyView().offset(x: 84).padding(.bottom, 136)
-                }
-            }
-            .frame(width: 380, height: 430)
-            .overlay(alignment: .topTrailing) {
-                if let sky = decor[.sky], sky != "sky.rainbow" {
-                    DecorArt(id: sky).padding(.top, 34).padding(.trailing, 26)
-                }
-            }
+        IslandThumbnail(stage: stage, mood: mood, decor: decor, angle: angle)
+            .background(StarField())
             .clipped()
-            .scaleEffect(scale)
-            .frame(width: geo.size.width, height: geo.size.height)
-        }
-        .background(StarField())
-        .clipped()
+            .gesture(DragGesture(minimumDistance: 8)
+                .updating($drag) { v, st, _ in st = Double(v.translation.width) / 110 }
+                .onEnded { v in base += Double(v.translation.width) / 110 })
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: decor)
     }
 }
