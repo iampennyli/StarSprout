@@ -12,6 +12,7 @@ enum DemoScreen: String, CaseIterable {
     case parent, parentTasks, parentRewards, pin
     case trees      // 美术检查：7 个阶段 × 4 种状态
     case shop       // 装饰商店
+    case decor      // 美术检查：全部装饰 + 几种搭配
 }
 
 enum DemoMode {

@@ -18,6 +18,7 @@ struct DemoScreenView: View {
         case .pin: PINGateView(title: "进入家长模式") {}
         case .trees: TreeGallery()
         case .shop: DemoShop()
+        case .decor: DecorGallery()
         case .session:
             if let rope = tasks.first(where: { $0.kind == .rope }) {
                 SessionFlowView(task: rope) {}
@@ -84,5 +85,39 @@ private struct DemoShop: View {
     @Query private var trees: [TreeState]
     var body: some View {
         DecorationShopView(stage: Economy.stage(for: trees.first?.growth ?? 0), mood: .normal)
+    }
+}
+
+/// 美术检查页：上面三种搭配的星球，下面所有装饰的单品图
+struct DecorGallery: View {
+    private let combos: [[DecorSlot: String]] = [
+        [.hat: "hat.crown", .ornament: "ornament.lantern", .ground: "ground.house", .sky: "sky.rainbow", .ring: "ring.gold"],
+        [.hat: "hat.bird", .ornament: "ornament.lights", .ground: "ground.swing", .sky: "sky.satellite", .ring: "ring.rainbow"],
+        [.hat: "hat.star", .ground: "ground.mushroom", .sky: "sky.moon"],
+    ]
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 4) {
+                MiniPlanetScene(stage: 5, mood: .normal, decor: combos[0])
+                MiniPlanetScene(stage: 7, mood: .normal, decor: combos[1])
+                MiniPlanetScene(stage: 3, mood: .normal, decor: combos[2])
+            }
+            .frame(height: 240)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
+                ForEach(DecorCatalog.all) { item in
+                    let n = DecorArt.naturalSize(item.id)
+                    VStack(spacing: 2) {
+                        DecorArt(id: item.id).scaleEffect(min(70 / n.width, 60 / n.height, 1.6)).frame(width: 80, height: 66)
+                        Text(item.name).font(.caption2).foregroundStyle(Theme.muted)
+                    }
+                    .frame(maxWidth: .infinity).padding(.vertical, 6)
+                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                }
+            }
+            .padding(.horizontal, 8)
+        }
+        .padding(.top, 54)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Theme.bg)
     }
 }
