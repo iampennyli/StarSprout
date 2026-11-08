@@ -23,7 +23,6 @@ struct VaultView: View {
     private func openRequest(_ c: Currency) -> Double {
         requests.filter { !$0.done && $0.currencyRaw == c.rawValue }.reduce(0) { $0 + $1.amount }
     }
-    private var stats: MedalStats { GameEngine.stats(checkIns: checkIns, tree: trees.first ?? TreeState()) }
     private var earnedIDs: Set<String> { Set(medals.map(\.medalID)) }
 
     var body: some View {
@@ -163,27 +162,37 @@ struct VaultView: View {
         }
     }
 
+    /// 只展示已经获得的勋章，按目录顺序（坚持 / 跳绳 / 跑步 / 成长 / 突破）
+    private var earnedDefs: [MedalDef] { MedalCatalog.all.filter { earnedIDs.contains($0.id) } }
+
     private var medalWall: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("勋章 · 已获得 \(earnedIDs.count) 枚").font(.subheadline).foregroundStyle(Theme.muted)
+                Text("勋章 · 已获得 \(earnedDefs.count) 枚").font(.subheadline).foregroundStyle(Theme.muted)
                 Spacer()
-                Text("点亮的勋章点开可分享").font(.caption).foregroundStyle(Theme.muted)
+                if !earnedDefs.isEmpty {
+                    Text("点开可分享").font(.caption).foregroundStyle(Theme.muted)
+                }
             }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 12) {
-                ForEach(MedalCatalog.all) { def in
-                    let earned = earnedIDs.contains(def.id)
-                    Button { if earned { sharing = def } } label: {
-                        VStack(spacing: 4) {
-                            MedalEmblem(glyph: def.hidden && !earned ? "?" : def.glyph,
-                                        color: earned ? def.rarity.color : Theme.locked, size: 58)
-                            Text(earned ? def.name : def.progressText(stats))
-                                .font(.caption2).foregroundStyle(earned ? .white : Theme.muted)
-                                .lineLimit(1).minimumScaleFactor(0.7)
+            if earnedDefs.isEmpty {
+                Text("完成第一次运动，就能拿到第一枚勋章")
+                    .font(.footnote).foregroundStyle(Theme.muted)
+                    .frame(maxWidth: .infinity)
+                    .card()
+            } else {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 12) {
+                    ForEach(earnedDefs) { def in
+                        Button { sharing = def } label: {
+                            VStack(spacing: 4) {
+                                MedalEmblem(glyph: def.glyph, color: def.rarity.color, size: 58)
+                                Text(def.name)
+                                    .font(.caption2).foregroundStyle(.white)
+                                    .lineLimit(1).minimumScaleFactor(0.7)
+                            }
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(def.name)，点击分享")
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(earned ? "\(def.name)，点击分享" : "\(def.hidden ? "隐藏勋章" : def.name)，未获得")
                 }
             }
         }

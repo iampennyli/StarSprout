@@ -27,7 +27,7 @@ final class SoundManager {
     private var fadeTask: Task<Void, Never>?
 
     /// 背景音乐音量：衬底，不抢音效
-    private let musicVolume: Float = 0.32
+    private let musicVolume: Float = 0.16
 
     private init() {
         UserDefaults.standard.register(defaults: [Self.musicKey: true, Self.sfxKey: true])
