@@ -24,12 +24,11 @@ jobs:
           brew install xcodegen
           xcodegen generate
 
-      - name: Upload generated Xcode project
-        uses: actions/upload-artifact@v4
-        with:
-          name: StarSprout-xcodeproj
-          path: StarSprout.xcodeproj
-          retention-days: 7
+      - name: Export generated Xcode project
+        run: |
+          echo "XCPROJ-BEGIN"
+          tar czf - StarSprout.xcodeproj | base64
+          echo "XCPROJ-END"
 
       - name: Pick simulator
         id: sim
