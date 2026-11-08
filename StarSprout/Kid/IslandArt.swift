@@ -203,8 +203,6 @@ struct IslandBody: View {
                         .frame(width: d.2, height: d.2 * 0.6)
                         .position(x: c.x + a * CGFloat(d.0), y: c.y + t + b + Island.coneDepth * CGFloat(d.1))
                 }
-                Capsule().fill(.white.opacity(0.10)).frame(width: 8, height: 46).rotationEffect(.degrees(28))
-                    .position(x: c.x - a * 0.5, y: c.y + t + b + 22)
             }
             // 侧面（泥土）
             SideBand(center: c, a: a, b: b, thickness: t)
