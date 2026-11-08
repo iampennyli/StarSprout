@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-BUNDLE=com.example.starsprout
+BUNDLE=li.penny.starsprout
 OUT=build/screenshots
 SCREENS=("$@")
 [ ${#SCREENS[@]} -eq 0 ] && SCREENS=(onboarding today planet vault session success medal share pin parent parentTasks parentRewards trees)

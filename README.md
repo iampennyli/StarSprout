@@ -14,8 +14,9 @@ xcodegen                   # 根据 project.yml 生成 StarSprout.xcodeproj
 open StarSprout.xcodeproj
 ```
 
-在 Xcode 里：选中 StarSprout target → Signing & Capabilities → 选你的 Team，并把 Bundle Identifier
-`com.example.starsprout` 改成你自己的，然后选模拟器或真机运行。`⌘U` 运行引擎单元测试。
+签名已配好：Bundle ID `li.penny.starsprout`，Team `3R3Q558848`，Xcode 自动签名（证书和描述文件由 Xcode 自动生成、续期）。
+第一次真机运行前，在 Xcode → Settings → Accounts 登录这个开发者账号，手机用数据线连上 Mac 并在手机上点「信任」，
+手机需打开「设置 → 隐私与安全性 → 开发者模式」。之后选你的 iPhone 运行即可。`⌘U` 运行引擎单元测试。
 
 不想装 XcodeGen：在 Xcode 新建一个 iOS App（SwiftUI、Storage 选 None、最低 iOS 17），
 删除自动生成的 ContentView 和 App 文件，把 `StarSprout/` 文件夹整个拖进去即可。

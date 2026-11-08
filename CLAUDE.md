@@ -15,6 +15,7 @@ xcodegen generate && open StarSprout.xcodeproj
 
 - 演示模式：启动参数 `-demo` 用内存数据库预置一个月数据，`-screen <页面>` 直达某页（`App/DemoMode.swift`）。改了界面后跑截图脚本自查。CI 也会截图并推到 `screenshots` 分支。
 
+- 签名：Bundle ID `li.penny.starsprout`，Team `3R3Q558848`（个人开发者账号），Xcode 自动签名；App ID 已在开发者网站注册。CI 构建用 `CODE_SIGNING_ALLOWED=NO`，不需要证书。
 - 工程由 `project.yml`（XcodeGen）生成，`StarSprout.xcodeproj` 不进仓库；新增文件放进 `StarSprout/` 对应目录即可，不要手改 pbxproj。
 - 完整构建日志在 `build/logs/`。改完代码必须跑一遍脚本，测试全过再提交。
 - 推送到 `main` 会触发 GitHub Actions，在本机自托管 runner（标签 `starsprout`，目录 `~/actions-runner-starsprout`）上跑同一个脚本。
