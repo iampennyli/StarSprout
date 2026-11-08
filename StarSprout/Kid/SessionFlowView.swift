@@ -119,11 +119,14 @@ struct SessionFlowView: View {
         timerTask = Task { @MainActor in
             for n in stride(from: 3, through: 1, by: -1) {
                 step = .countdown(n)
+                SoundManager.shared.play(.tick)
                 try? await Task.sleep(for: .seconds(1))
                 if Task.isCancelled { return }
             }
             for r in stride(from: 60, through: 0, by: -1) {
                 step = .running(r)
+                if r == 60 || r == 0 { SoundManager.shared.play(.go) }
+                else if r <= 3 { SoundManager.shared.play(.tick) }
                 if r == 0 { break }
                 try? await Task.sleep(for: .seconds(1))
                 if Task.isCancelled { return }
@@ -215,6 +218,7 @@ struct SessionFlowView: View {
         GameEngine.evaluateMedals(ctx: ctx)
         NotificationManager.reschedule(ctx: ctx)
         result = r
+        SoundManager.shared.play(r.checkIn.reached ? .checkin : .coin)
         finishedTick += 1
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { step = .done }
     }

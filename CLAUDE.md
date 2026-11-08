@@ -9,6 +9,7 @@
 ./scripts/build-and-test.sh                 # 生成工程 + 选最新 iPhone 模拟器 + 编译 + 跑单元测试
 SIM_NAME="iPhone 17" ./scripts/build-and-test.sh
 ./scripts/screenshots.sh [today planet …]  # 演示数据 + 模拟器逐页截图 → build/screenshots/
+python3 scripts/sound/generate_sounds.py  # 重新合成背景音乐和音效（numpy + scipy + ffmpeg）
 xcodegen generate && open StarSprout.xcodeproj
 ```
 
@@ -29,6 +30,8 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 | `Engine/GameEngine.swift` | **所有奖励与养成规则**。界面只调用引擎，不自己算账 |
 | `Engine/Medals.swift` | 勋章目录与判定 |
 | `Engine/NotificationManager.swift` | 本地通知，重排未来 7 天，当天已运动则跳过 |
+| `Engine/SoundManager.swift` | 星球页背景音乐（无缝循环、淡入淡出）+ 音效；`.ambient` 会话遵从静音键；开关在 UserDefaults |
+| `Resources/Sounds/` | 由 `scripts/sound/generate_sounds.py` 程序合成的音频，**不要手工替换**，改脚本参数后重新生成 |
 | `Kid/` | 孩子端：今日任务 + 月历、打卡流程、打卡成功、星球（动画）、宝库 + 勋章 |
 | `Parent/` | 家长端：密码门、审批统计、任务编辑、奖励设置 |
 | `Onboarding/` | 首次引导（监护人同意 + 第一个任务） |

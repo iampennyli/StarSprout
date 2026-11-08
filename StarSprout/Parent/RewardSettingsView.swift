@@ -8,6 +8,8 @@ struct RewardSettingsView: View {
     @Query private var settingsList: [AppSettings]
     @State private var newPIN = ""
     @State private var pinSaved = false
+    @AppStorage(SoundManager.musicKey) private var musicOn = true
+    @AppStorage(SoundManager.sfxKey) private var sfxOn = true
 
     var body: some View {
         NavigationStack {
@@ -47,6 +49,12 @@ struct RewardSettingsView: View {
             } header: { Text("兑现") } footer: {
                 Text("App 只记账：零花钱由你线下给，屏幕时间由你在 iPhone「屏幕使用时间」里放行。成绩明显不合理时，即使开了信任模式也会请你核实。")
             }
+            Section {
+                Toggle("星球背景音乐", isOn: $musicOn)
+                Toggle("音效（浇水、施肥、打卡等）", isOn: $sfxOn)
+            } header: { Text("声音") } footer: {
+                Text("手机静音时不会出声，也不会打断正在播放的其他音乐。")
+            }
             Section("提醒") {
                 Stepper("晚上 \(s.eveningReminderHour):00 还没运动就提醒", value: $s.eveningReminderHour, in: 17...22)
             }
@@ -69,6 +77,7 @@ struct RewardSettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .onChange(of: s.eveningReminderHour) { _, _ in NotificationManager.reschedule(ctx: ctx) }
+        .onChange(of: musicOn) { _, _ in SoundManager.shared.settingsChanged() }
         .onDisappear { try? ctx.save() }
     }
 }

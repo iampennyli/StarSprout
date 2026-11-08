@@ -3,6 +3,7 @@ import SwiftData
 
 struct PlanetView: View {
     @Environment(\.modelContext) private var ctx
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var trees: [TreeState]
     @Query private var entries: [LedgerEntry]
     @Query private var checkIns: [CheckIn]
@@ -43,7 +44,15 @@ struct PlanetView: View {
             }
             if let s = levelUp { levelUpOverlay(stage: s) }
         }
-        .onAppear { sway = true }
+        .onAppear {
+            sway = true
+            SoundManager.shared.startMusic()
+        }
+        .onDisappear { SoundManager.shared.stopMusic() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { SoundManager.shared.startMusic() }
+            else { SoundManager.shared.stopMusic(remember: true) }
+        }
     }
 
     // MARK: Header
@@ -110,7 +119,7 @@ struct PlanetView: View {
             .accessibilityLabel("摸摸小树")
 
             if stage >= 5 {
-                Button { bunnyTick += 1 } label: {
+                Button { bunnyTick += 1; SoundManager.shared.play(.bunny) } label: {
                     BunnyView()
                         .phaseAnimator([0.0, -24, 0], trigger: bunnyTick) { v, y in v.offset(y: y) }
                 }
@@ -219,6 +228,7 @@ struct PlanetView: View {
     private func tapTree() {
         guard !busy else { return }
         wiggleTick += 1
+        SoundManager.shared.play(.tapTree)
         say(mood.message ?? lines.randomElement()!)
     }
 
@@ -227,6 +237,7 @@ struct PlanetView: View {
         switch GameEngine.water(ctx: ctx) {
         case .noWater:
             shakeWaterTick += 1
+            SoundManager.shared.play(.nope)
             say(GameEngine.exercisedToday(checkIns) ? "今天的水用完啦，明天运动后再来" : "运动一次，水壶就会装满哦")
         case .grew(let added, let newStage):
             play(.water, added: added, newStage: newStage)
@@ -239,9 +250,11 @@ struct PlanetView: View {
         switch GameEngine.fertilize(ctx: ctx) {
         case .cooldown(let d):
             shakeFertTick += 1
+            SoundManager.shared.play(.nope)
             say("肥料 \(Economy.fertilizerCooldownDays) 天才能用一次，还要等 \(d) 天")
         case .noCoins:
             shakeFertTick += 1
+            SoundManager.shared.play(.nope)
             say("金币不够啦，去完成任务吧")
         case .grew(let added, let newStage):
             play(.fertilizer, added: added, newStage: newStage)
@@ -252,6 +265,7 @@ struct PlanetView: View {
     private func play(_ e: Effect, added: Int, newStage: Int?) {
         busy = true
         effect = e
+        SoundManager.shared.play(e == .water ? .water : .fertilize)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             pulseTick += 1
             floatText = "+\(added)"
@@ -260,7 +274,10 @@ struct PlanetView: View {
             effect = nil
             floatText = nil
             busy = false
-            if let newStage { withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { levelUp = newStage } }
+            if let newStage {
+                SoundManager.shared.play(.levelup)
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { levelUp = newStage }
+            }
             GameEngine.evaluateMedals(ctx: ctx)
         }
     }

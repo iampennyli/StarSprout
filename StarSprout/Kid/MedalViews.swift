@@ -125,6 +125,7 @@ struct MedalUnlockView: View {
             }
         }
         .onAppear {
+            SoundManager.shared.play(.medal)
             withAnimation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.2)) { flipped = true }
         }
         .onTapGesture { if !flipped { flipped = true } }
