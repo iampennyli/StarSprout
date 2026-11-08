@@ -47,5 +47,6 @@ set -e
 
 echo "== 结果 =="
 grep -E "error:|Test Case .*(passed|failed)|\*\* (BUILD|TEST) (SUCCEEDED|FAILED) \*\*" "$LOG" | grep -v "CoreData" | sort -u || true
-grep -cE "warning:" "$LOG" | xargs -I{} echo "警告数：{}"
+echo "== 警告 =="
+grep -E "warning:" "$LOG" | grep -v "CoreData" | sed "s#.*/StarSprout/##" | sort -u | head -30 || true
 exit $STATUS
