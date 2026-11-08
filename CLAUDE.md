@@ -58,7 +58,7 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 
 ## 已知待办
 
-- 美术：树 / 星球 / 小兔子是基础图形占位，后续换 Lottie / Rive
+- 美术：树（7 阶段 × 4 状态，带表情）、星球、草地、小兔子已用 SwiftUI 矢量重画（`Kid/TreeView.swift`、`Kid/PlanetArt.swift`，插画专用色写在这两个文件里）。`-screen trees` 是美术检查页。将来要更细腻的动效再考虑 Lottie / Rive
 - 分享卡二维码、App 正式名称、隐私政策和儿童个人信息保护规则正文
 - 第二阶段：新种子、星球装饰、扩建、星果兑换真实奖励、屏幕时间自动管控（Family Controls）
 - 界面已用 `scripts/screenshots.sh` 逐页截图检查过一轮（2026-11-08）；美术替换后需再过一遍
