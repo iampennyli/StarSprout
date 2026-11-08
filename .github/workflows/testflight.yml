@@ -1,0 +1,25 @@
+name: TestFlight
+
+# 手动触发：在本机 Mac（自托管 runner）上 Release 归档并上传到 App Store Connect。
+# 需要本机 Xcode → Settings → Accounts 已登录开发者账号。
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: 归档并上传 TestFlight
+    runs-on: [self-hosted, macOS, starsprout]
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - name: Archive & upload
+        run: ./scripts/testflight.sh
+      - name: 上传失败时打印日志
+        if: failure()
+        run: |
+          tail -60 build/logs/archive.log 2>/dev/null || true
+          tail -60 build/logs/upload.log 2>/dev/null || true
