@@ -8,13 +8,13 @@ import SwiftUI
 enum Island {
     /// 场景画布（星球页、商店预览、首页缩略都按这个尺寸画，再整体缩放）
     static let canvas = CGSize(width: 380, height: 430)
-    static let center = CGPoint(x: 190, y: 286)
+    static let center = CGPoint(x: 190, y: 268)
     /// 顶面椭圆的半长轴 / 半短轴（短轴约为长轴的 1/3，就是 30° 俯视的观感）
     static let a: CGFloat = 146
     static let b: CGFloat = 48
     /// 侧面泥土层厚度、底锥深度
     static let thickness: CGFloat = 30
-    static let coneDepth: CGFloat = 92
+    static let coneDepth: CGFloat = 80
     /// 小树在小岛上的缩放
     static let treeScale: CGFloat = 0.86
 
@@ -194,23 +194,18 @@ struct IslandBody: View {
         ZStack(alignment: .topLeading) {
             // 底锥（岩石）
             ConeShape(center: c, a: a, b: b, top: t, depth: Island.coneDepth)
-                .fill(LinearGradient(colors: [Color(hex: 0x8A5C3C), Color(hex: 0x5B4170), Color(hex: 0x2E2656)],
+                .fill(LinearGradient(colors: [Color(hex: 0x9A6A46), Color(hex: 0x76589C), Color(hex: 0x4E4286)],
                                      startPoint: .top, endPoint: .bottom))
-            // 岩层纹理
-            ConeShape(center: c, a: a, b: b, top: t, depth: Island.coneDepth)
-                .fill(.clear)
-                .overlay {
-                    ZStack(alignment: .topLeading) {
-                        ForEach(0..<3, id: \.self) { i in
-                            let y = c.y + t + 18 + CGFloat(i) * 22
-                            let w = a * (1.7 - CGFloat(i) * 0.45)
-                            Ellipse().stroke(Color.white.opacity(0.08), lineWidth: 3)
-                                .frame(width: w, height: w * 0.18)
-                                .position(x: c.x + 4, y: y)
-                        }
-                    }
+            // 岩石上的斑点和高光，让底锥更有体积感
+            ZStack(alignment: .topLeading) {
+                ForEach(Array([(-0.45, 0.32, 18.0), (0.30, 0.42, 14.0), (-0.12, 0.62, 11.0), (0.52, 0.18, 10.0), (0.05, 0.25, 8.0)].enumerated()), id: \.offset) { _, d in
+                    Ellipse().fill(Color(hex: 0x3A2F66).opacity(0.55))
+                        .frame(width: d.2, height: d.2 * 0.6)
+                        .position(x: c.x + a * CGFloat(d.0), y: c.y + t + b + Island.coneDepth * CGFloat(d.1))
                 }
-                .clipShape(ConeShape(center: c, a: a, b: b, top: t, depth: Island.coneDepth))
+                Capsule().fill(.white.opacity(0.10)).frame(width: 8, height: 46).rotationEffect(.degrees(28))
+                    .position(x: c.x - a * 0.5, y: c.y + t + b + 22)
+            }
             // 侧面（泥土）
             SideBand(center: c, a: a, b: b, thickness: t)
                 .fill(LinearGradient(colors: [Color(hex: 0xB07A4F), Color(hex: 0x8A5C3C)], startPoint: .top, endPoint: .bottom))

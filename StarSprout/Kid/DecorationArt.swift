@@ -26,7 +26,9 @@ struct DecorArt: View {
         case "ring.ice": RingIcon(style: .ice)
         case "hat.bow": Bow()
         case "hat.santa": SantaHat()
-        case "ornament.chime", "ornament.stars":
+        case "ornament.chime":
+            OrnamentArt(id: "ornament.chime.icon", size: CGSize(width: 70, height: 56)).frame(width: 70, height: 56)
+        case "ornament.stars":
             OrnamentArt(id: id, size: CGSize(width: 90, height: 60)).frame(width: 70, height: 56)
         case "ground.flowers": FlowerBush()
         case "ground.pumpkin": Pumpkin()
@@ -158,6 +160,8 @@ struct OrnamentArt: View {
         case "ornament.lights": lights
         case "ornament.chime":
             chime(x: 0.76, y: 0.72, scale: size.width / 130)
+        case "ornament.chime.icon":
+            chime(x: 0.5, y: 0.08, scale: 1.4)
         case "ornament.stars":
             ZStack {
                 ForEach(Array([(0.22, 0.62, 18.0), (0.42, 0.78, 26.0), (0.62, 0.74, 14.0), (0.82, 0.60, 22.0)].enumerated()), id: \.offset) { _, s in
