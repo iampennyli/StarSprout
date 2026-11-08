@@ -8,6 +8,9 @@ struct PlanetView: View {
     @Query private var entries: [LedgerEntry]
     @Query private var checkIns: [CheckIn]
     @Query private var settingsList: [AppSettings]
+    @Query private var decorations: [OwnedDecoration]
+    @State private var showShop = false
+    @State private var satelliteFloat = false
 
     @State private var wiggleTick = 0
     @State private var pulseTick = 0
@@ -29,6 +32,7 @@ struct PlanetView: View {
     private var mood: TreeMood { GameEngine.mood(checkIns) }
     private var water: Int { GameEngine.waterLeft(entries) }
     private var coins: Int { Int(GameEngine.balance(.coins, entries)) }
+    private var decor: [DecorSlot: String] { GameEngine.equippedDecorations(decorations) }
     private var fertDaysLeft: Int { tree.map { GameEngine.fertilizerDaysLeft($0) } ?? 0 }
 
     private let lines = ["嘿！今天运动了吗？", "谢谢你照顾我", "我又长高一点了", "痒痒的，哈哈", "我们一起变强吧"]
@@ -43,6 +47,9 @@ struct PlanetView: View {
                 bottomPanel
             }
             if let s = levelUp { levelUpOverlay(stage: s) }
+        }
+        .sheet(isPresented: $showShop) {
+            DecorationShopView(stage: stage, mood: mood)
         }
         .onAppear {
             sway = true
@@ -93,18 +100,17 @@ struct PlanetView: View {
     private var scene: some View {
         ZStack(alignment: .bottom) {
             Circle().fill(Theme.leaf.opacity(0.08)).frame(width: 260, height: 260).padding(.bottom, 150)
+            skyBackLayer
             // 星环后半圈在星球后面，前半圈压在星球前面，看起来是环绕而不是穿过
-            Ellipse().trim(from: 0.5, to: 1).stroke(Theme.pink.opacity(0.35), lineWidth: 4)
+            PlanetRing(style: PlanetRing.style(for: decor[.ring]), back: true)
                 .frame(width: 380, height: 70).padding(.bottom, 26)
             PlanetBody(stage: stage).offset(y: 200)
-            Ellipse().trim(from: 0, to: 0.5)
-                .stroke(LinearGradient(colors: [Theme.pink.opacity(0.3), Theme.pink.opacity(0.8), Theme.pink.opacity(0.3)],
-                                       startPoint: .leading, endPoint: .trailing), lineWidth: 4)
+            PlanetRing(style: PlanetRing.style(for: decor[.ring]), back: false)
                 .frame(width: 380, height: 70).padding(.bottom, 26)
             GrassCap(stage: stage).padding(.bottom, stage >= 3 ? 122 : 128)
 
             Button(action: tapTree) {
-                TreeView(stage: stage, mood: mood)
+                TreeView(stage: stage, mood: mood, hat: decor[.hat], ornament: stage >= 3 ? decor[.ornament] : nil)
                     .rotationEffect(.degrees(mood == .normal ? (sway ? 1 : -1) : 0), anchor: .bottom)
                     .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: sway)
                     .phaseAnimator([0.0, -5, 4, -2, 0], trigger: wiggleTick) { v, angle in
@@ -117,6 +123,13 @@ struct PlanetView: View {
             .buttonStyle(.plain)
             .padding(.bottom, 134)
             .accessibilityLabel("摸摸小树")
+
+            if let ground = decor[.ground] {
+                DecorArt(id: ground)
+                    .offset(x: -86)
+                    .padding(.bottom, 132)
+                    .allowsHitTesting(false)
+            }
 
             if stage >= 5 {
                 Button { bunnyTick += 1; SoundManager.shared.play(.bunny) } label: {
@@ -133,6 +146,7 @@ struct PlanetView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 430)
+        .overlay(alignment: .topTrailing) { skyFrontLayer }
         .clipped()
         .overlay(alignment: .topLeading) {
             if let bubble {
@@ -144,6 +158,31 @@ struct PlanetView: View {
                     .padding(.leading, 20).padding(.top, 40)
                     .transition(.scale(scale: 0.5, anchor: .bottomTrailing).combined(with: .opacity))
             }
+        }
+    }
+
+    /// 天空装饰：彩虹在小树后面，月亮 / 卫星挂在天上
+    @ViewBuilder
+    private var skyBackLayer: some View {
+        if decor[.sky] == "sky.rainbow" {
+            Rainbow(width: 330).opacity(0.75).padding(.bottom, 150)
+        }
+    }
+
+    @ViewBuilder
+    private var skyFrontLayer: some View {
+        switch decor[.sky] {
+        case "sky.moon":
+            DecorArt(id: "sky.moon").padding(.top, 34).padding(.trailing, 26)
+        case "sky.satellite":
+            DecorArt(id: "sky.satellite")
+                .rotationEffect(.degrees(-14))
+                .offset(y: satelliteFloat ? -6 : 6)
+                .animation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true), value: satelliteFloat)
+                .padding(.top, 44).padding(.trailing, 22)
+                .onAppear { satelliteFloat = true }
+        default:
+            EmptyView()
         }
     }
 
@@ -180,8 +219,8 @@ struct PlanetView: View {
                 actionButton(icon: "leaf.fill", title: "施肥",
                              sub: fertDaysLeft > 0 ? "\(fertDaysLeft) 天后可用" : "\(Economy.fertilizerCost) 金币 · +\(Economy.fertilizerGrowth)",
                              tint: Theme.lime, highlighted: false, shakeTick: shakeFertTick, action: doFertilize)
-                actionButton(icon: "sparkles", title: "新种子", sub: "即将开放", tint: Theme.pink,
-                             highlighted: false, shakeTick: 0) { say("长成结果的树后，就能种新种子啦") }
+                actionButton(icon: "paintpalette.fill", title: "装饰", sub: "\(coins) 金币可用", tint: Theme.pink,
+                             highlighted: false, shakeTick: 0) { showShop = true }
             }
         }
         .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 14)

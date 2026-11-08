@@ -105,6 +105,55 @@ final class GameEngineTests: XCTestCase {
         }
     }
 
+    // MARK: Decorations
+
+    private func giveCoins(_ n: Double) {
+        ctx.insert(LedgerEntry(currency: .coins, amount: n, reason: "测试"))
+        try? ctx.save()
+    }
+    private var coins: Double { GameEngine.balance(.coins, entries) }
+    private var owned: [OwnedDecoration] { GameEngine.fetch(OwnedDecoration.self, ctx) }
+
+    func testBuyDecorationSpendsCoinsAndEquips() {
+        giveCoins(100)
+        XCTAssertEqual(GameEngine.buyDecoration("hat.crown", ctx: ctx), .bought)
+        XCTAssertEqual(coins, 20)
+        XCTAssertEqual(GameEngine.equippedDecorations(owned)[.hat], "hat.crown")
+        XCTAssertEqual(GameEngine.buyDecoration("hat.crown", ctx: ctx), .alreadyOwned)
+        XCTAssertEqual(coins, 20)
+    }
+
+    func testCannotBuyWithoutEnoughCoins() {
+        giveCoins(25)
+        XCTAssertEqual(GameEngine.buyDecoration("hat.star", ctx: ctx), .noCoins(need: 15))
+        XCTAssertEqual(coins, 25)
+        XCTAssertTrue(owned.isEmpty)
+    }
+
+    func testStageLockedDecoration() {
+        giveCoins(500)
+        XCTAssertEqual(GameEngine.buyDecoration("ground.house", ctx: ctx), .locked(stage: 4))
+        GameEngine.tree(ctx).growth = Economy.stageThresholds[3]
+        XCTAssertEqual(GameEngine.buyDecoration("ground.house", ctx: ctx), .bought)
+    }
+
+    func testOneDecorationPerSlotAndOwnedForever() {
+        giveCoins(500)
+        GameEngine.buyDecoration("hat.star", ctx: ctx)
+        GameEngine.buyDecoration("hat.crown", ctx: ctx)
+        GameEngine.buyDecoration("sky.moon", ctx: ctx)
+        var eq = GameEngine.equippedDecorations(owned)
+        XCTAssertEqual(eq[.hat], "hat.crown")
+        XCTAssertEqual(eq[.sky], "sky.moon")
+        GameEngine.equipDecoration("hat.star", ctx: ctx)
+        eq = GameEngine.equippedDecorations(owned)
+        XCTAssertEqual(eq[.hat], "hat.star")
+        GameEngine.unequipDecoration("hat.star", ctx: ctx)
+        XCTAssertNil(GameEngine.equippedDecorations(owned)[.hat])
+        XCTAssertEqual(owned.count, 3)
+        XCTAssertEqual(coins, 500 - 40 - 80 - 50)
+    }
+
     func testWateringLimitedToThreePerDay() {
         GameEngine.submit(task: rope, value: 100, ctx: ctx, now: day(0))
         for _ in 0..<3 {

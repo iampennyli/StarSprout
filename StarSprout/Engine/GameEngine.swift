@@ -349,4 +349,61 @@ enum GameEngine {
         if !new.isEmpty { try? ctx.save() }
         return new
     }
+
+    // MARK: - Decorations
+
+    enum BuyResult: Equatable {
+        case bought
+        case alreadyOwned
+        case noCoins(need: Int)
+        case locked(stage: Int)
+        case unknown
+    }
+
+    /// 用金币买一件装饰；买下后自动换上（替换同一位置原来那件）
+    @discardableResult
+    static func buyDecoration(_ id: String, ctx: ModelContext, now: Date = .now) -> BuyResult {
+        guard let item = DecorCatalog.item(id) else { return .unknown }
+        let owned = fetch(OwnedDecoration.self, ctx)
+        if owned.contains(where: { $0.itemID == id }) { return .alreadyOwned }
+        let stageNow = Economy.stage(for: tree(ctx).growth)
+        if stageNow < item.minStage { return .locked(stage: item.minStage) }
+        let coins = Int(balance(.coins, fetch(LedgerEntry.self, ctx)))
+        if coins < item.price { return .noCoins(need: item.price - coins) }
+
+        ctx.insert(LedgerEntry(currency: .coins, amount: -Double(item.price), reason: "装饰：\(item.name)", date: now))
+        let record = OwnedDecoration(itemID: id, purchasedAt: now)
+        ctx.insert(record)
+        equip(record, among: owned)
+        try? ctx.save()
+        return .bought
+    }
+
+    /// 换上一件已拥有的装饰，同一位置的其他装饰自动取下
+    static func equipDecoration(_ id: String, ctx: ModelContext) {
+        let owned = fetch(OwnedDecoration.self, ctx)
+        guard let record = owned.first(where: { $0.itemID == id }) else { return }
+        equip(record, among: owned)
+        try? ctx.save()
+    }
+
+    static func unequipDecoration(_ id: String, ctx: ModelContext) {
+        fetch(OwnedDecoration.self, ctx).filter { $0.itemID == id }.forEach { $0.equipped = false }
+        try? ctx.save()
+    }
+
+    private static func equip(_ record: OwnedDecoration, among owned: [OwnedDecoration]) {
+        guard let slot = record.item?.slot else { return }
+        for o in owned where o.item?.slot == slot { o.equipped = false }
+        record.equipped = true
+    }
+
+    /// 当前换上的装饰：位置 → 装饰 id
+    static func equippedDecorations(_ owned: [OwnedDecoration]) -> [DecorSlot: String] {
+        var map: [DecorSlot: String] = [:]
+        for o in owned where o.equipped {
+            if let slot = o.item?.slot { map[slot] = o.itemID }
+        }
+        return map
+    }
 }

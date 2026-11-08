@@ -17,6 +17,7 @@ struct DemoScreenView: View {
         case .parent, .parentTasks, .parentRewards: ParentHomeView(initialTab: parentTab)
         case .pin: PINGateView(title: "进入家长模式") {}
         case .trees: TreeGallery()
+        case .shop: DemoShop()
         case .session:
             if let rope = tasks.first(where: { $0.kind == .rope }) {
                 SessionFlowView(task: rope) {}
@@ -76,5 +77,12 @@ struct TreeGallery: View {
         .padding(.top, 50)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Theme.bg)
+    }
+}
+
+private struct DemoShop: View {
+    @Query private var trees: [TreeState]
+    var body: some View {
+        DecorationShopView(stage: Economy.stage(for: trees.first?.growth ?? 0), mood: .normal)
     }
 }

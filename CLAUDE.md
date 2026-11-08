@@ -30,6 +30,7 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 | `Engine/Economy.swift` | **所有数值的唯一出处**（水、金币、施肥、阶段门槛）。调数值只改这里 |
 | `Engine/GameEngine.swift` | **所有奖励与养成规则**。界面只调用引擎，不自己算账 |
 | `Engine/Medals.swift` | 勋章目录与判定 |
+| `Engine/Decorations.swift` | 装饰目录（5 个位置、13 件、价格和解锁阶段）；购买 / 换上 / 取下规则在 GameEngine |
 | `Engine/NotificationManager.swift` | 本地通知，重排未来 7 天，当天已运动则跳过 |
 | `Engine/SoundManager.swift` | 星球页背景音乐（无缝循环、淡入淡出）+ 音效；`.ambient` 会话遵从静音键；开关在 UserDefaults |
 | `Resources/Sounds/` | 由 `scripts/sound/generate_sounds.py` 程序合成的音频，**不要手工替换**，改脚本参数后重新生成 |
@@ -50,6 +51,7 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 8. 1 分钟跳绳超过 220 个视为可疑，即使信任模式也要家长核实；破纪录金币需家长确认。
 9. **儿童隐私**：只存昵称和年龄段，数据只在本机；分享卡不出现真名、照片、学校，分享前要家长密码。不接第三方统计 / 广告 SDK（App Store 儿童类别要求）。
 10. App 只记账：不处理真钱，不直接控制其他 App 的屏幕时间。
+11. **装饰只改外观、不影响成长**：用金币买，买了永久拥有、可随时换上取下，每个位置同时只能换上一件；购买前有确认，避免孩子误点。
 
 ## 设计规范
 
@@ -64,7 +66,7 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 
 - 美术：树（7 阶段 × 4 状态，带表情）、星球、草地、小兔子已用 SwiftUI 矢量重画（`Kid/TreeView.swift`、`Kid/PlanetArt.swift`，插画专用色写在这两个文件里）。`-screen trees` 是美术检查页。将来要更细腻的动效再考虑 Lottie / Rive
 - 分享卡二维码、App 正式名称、隐私政策和儿童个人信息保护规则正文
-- 第二阶段：新种子、星球装饰、扩建、星果兑换真实奖励、屏幕时间自动管控（Family Controls）
+- 第二阶段：新种子、扩建、星果兑换真实奖励、屏幕时间自动管控（Family Controls）
 - 界面已用 `scripts/screenshots.sh` 逐页截图检查过一轮（2026-11-08）；美术替换后需再过一遍
 
 ## 提交约定

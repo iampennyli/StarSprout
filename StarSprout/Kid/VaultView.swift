@@ -114,7 +114,7 @@ struct VaultView: View {
                 Text("\(Int(coins))").font(.system(size: 28, weight: .bold, design: .rounded)).foregroundStyle(Theme.gold)
             }
             Spacer()
-            Text("施肥、种子、装饰都要用").font(.caption).foregroundStyle(Theme.muted)
+            Text("施肥、买装饰都要用").font(.caption).foregroundStyle(Theme.muted)
         }
         .card(radius: 18)
     }

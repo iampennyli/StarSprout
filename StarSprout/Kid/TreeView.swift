@@ -5,6 +5,9 @@ import SwiftUI
 struct TreeView: View {
     var stage: Int
     var mood: TreeMood = .normal
+    /// 换上的树顶装饰 / 树冠挂饰（DecorCatalog 的 id）
+    var hat: String? = nil
+    var ornament: String? = nil
 
     // MARK: Palette
 
@@ -48,7 +51,42 @@ struct TreeView: View {
         }
     }
 
+    /// 植物最高点离树根的距离，树顶装饰放在这里
+    private var topY: CGFloat {
+        switch stage {
+        case ...1: return 38
+        case 2: return 84
+        case 3: return 148
+        case 4: return 214
+        default: return 252
+        }
+    }
+    private var hatScale: CGFloat {
+        switch stage {
+        case ...2: return 0.7
+        case 3: return 0.8
+        default: return 1
+        }
+    }
+
     var body: some View {
+        ZStack(alignment: .bottom) {
+            plant
+            if let hat {
+                DecorArt(id: hat)
+                    .scaleEffect(hatScale, anchor: .bottom)
+                    .padding(.bottom, topY - 8)
+            }
+        }
+        .scaleEffect(x: 1, y: mood == .thirsty ? 0.96 : 1, anchor: .bottom)
+        .frame(width: 240, height: 260, alignment: .bottom)
+        .overlay(alignment: .topTrailing) { moodBadge }
+        .accessibilityElement()
+        .accessibilityLabel("小树，第 \(stage) 阶段" + (mood.message.map { "，\($0)" } ?? ""))
+    }
+
+    @ViewBuilder
+    private var plant: some View {
         ZStack(alignment: .bottom) {
             switch stage {
             case ...1: seed
@@ -58,11 +96,6 @@ struct TreeView: View {
             default: tree(trunk: CGSize(width: 34, height: 104), canopy: CGSize(width: 204, height: 168), lift: 84)
             }
         }
-        .scaleEffect(x: 1, y: mood == .thirsty ? 0.96 : 1, anchor: .bottom)
-        .frame(width: 240, height: 260, alignment: .bottom)
-        .overlay(alignment: .topTrailing) { moodBadge }
-        .accessibilityElement()
-        .accessibilityLabel("小树，第 \(stage) 阶段" + (mood.message.map { "，\($0)" } ?? ""))
     }
 
     @ViewBuilder
@@ -152,6 +185,7 @@ struct TreeView: View {
             }
             if stage >= 6 && mood == .normal { flowers(in: size) }
             if stage >= 7 && mood == .normal { fruits(in: size) }
+            if let ornament { OrnamentArt(id: ornament, size: size) }
             TreeFace(mood: mood, scale: face).offset(y: size.height * 0.1)
         }
         .frame(width: size.width, height: size.height)

@@ -11,6 +11,7 @@ enum DemoScreen: String, CaseIterable {
     case onboarding, today, planet, vault, session, success, medal, share
     case parent, parentTasks, parentRewards, pin
     case trees      // 美术检查：7 个阶段 × 4 种状态
+    case shop       // 装饰商店
 }
 
 enum DemoMode {
@@ -85,6 +86,11 @@ enum DemoMode {
         _ = GameEngine.water(ctx: ctx, now: cal.date(byAdding: .hour, value: 9, to: today)!)
 
         ctx.insert(RedemptionRequest(currency: .money, amount: 5))
+
+        // 用攒下的金币买几件装饰
+        for id in ["ground.mushroom", "hat.star", "sky.moon", "ornament.lights"] {
+            GameEngine.buyDecoration(id, ctx: ctx, now: cal.date(byAdding: .hour, value: 10, to: today)!)
+        }
 
         GameEngine.evaluateMedals(ctx: ctx)
         for m in GameEngine.fetch(MedalRecord.self, ctx) { m.celebrated = true }

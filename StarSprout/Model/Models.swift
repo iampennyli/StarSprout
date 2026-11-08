@@ -202,9 +202,25 @@ final class MedalRecord {
     }
 }
 
+/// 孩子用金币买下的装饰。买了永远保留；equipped 表示当前是否换上（每个位置最多一件）
+@Model
+final class OwnedDecoration {
+    var itemID: String = ""
+    var purchasedAt: Date = Date()
+    var equipped: Bool = false
+
+    init(itemID: String, purchasedAt: Date = Date(), equipped: Bool = false) {
+        self.itemID = itemID
+        self.purchasedAt = purchasedAt
+        self.equipped = equipped
+    }
+
+    var item: DecorItem? { DecorCatalog.item(itemID) }
+}
+
 enum AppSchema {
     static let models: [any PersistentModel.Type] = [
         AppSettings.self, SportTask.self, CheckIn.self, LedgerEntry.self,
-        RedemptionRequest.self, TreeState.self, MedalRecord.self
+        RedemptionRequest.self, TreeState.self, MedalRecord.self, OwnedDecoration.self
     ]
 }

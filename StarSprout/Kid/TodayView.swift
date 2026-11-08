@@ -8,6 +8,7 @@ struct TodayView: View {
     @Query private var entries: [LedgerEntry]
     @Query private var trees: [TreeState]
     @Query private var settingsList: [AppSettings]
+    @Query private var decorations: [OwnedDecoration]
 
     @Binding var tab: KidTab
     var openParent: () -> Void
@@ -115,7 +116,10 @@ struct TodayView: View {
             HStack(spacing: 12) {
                 ZStack(alignment: .bottom) {
                     PlanetBody(stage: stage, diameter: 64).offset(y: 24)
-                    TreeView(stage: stage, mood: mood).scaleEffect(0.24).frame(width: 58, height: 62)
+                    TreeView(stage: stage, mood: mood,
+                             hat: GameEngine.equippedDecorations(decorations)[.hat],
+                             ornament: stage >= 3 ? GameEngine.equippedDecorations(decorations)[.ornament] : nil)
+                        .scaleEffect(0.24).frame(width: 58, height: 62)
                 }
                 .frame(width: 72, height: 72)
                 .clipped()
