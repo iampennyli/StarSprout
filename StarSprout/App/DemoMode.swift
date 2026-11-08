@@ -26,7 +26,7 @@ enum DemoMode {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: Schema(AppSchema.models), configurations: config)
         if screen != .onboarding {
-            seed(container.mainContext)
+            seed(ModelContext(container))
         }
         return container
     }
