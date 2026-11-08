@@ -19,6 +19,7 @@ xcodegen generate && open StarSprout.xcodeproj
 
 - 调试面板（只在 Debug 构建）：星球页标题旁的瓢虫按钮 → 直接跳到任意成长阶段、成长 ±、不限次浇水、免费施肥、加金币、清空装饰、强制小树状态。开关在 `Engine/DebugTools.swift`（`DebugFlags`，存 UserDefaults），全部包在 `#if DEBUG` 里，Release 不包含；单元测试 setUp 会重置。
 - 签名：Bundle ID `li.penny.starsprout`，Team `3R3Q558848`（个人开发者账号），Xcode 自动签名；App ID 已在开发者网站注册。CI 构建用 `CODE_SIGNING_ALLOWED=NO`，不需要证书。
+- 发布：App Store Connect 里的 App 名「运动星球 StarSprout」（「运动星球」已被占用），版本 1.0。TestFlight 内部组「家人」、外部组「公开测试」（公开链接 https://testflight.apple.com/join/rn45mv5b）。隐私政策 `PRIVACY.md`（GitHub 公开地址用作隐私政策网址），改了数据处理方式要同步更新。上传新构建：本机运行 `./scripts/testflight.sh`（runner 后台服务拿不到钥匙串私钥，不能在 CI 里签名）。
 - 工程由 `project.yml`（XcodeGen）生成，`StarSprout.xcodeproj` 不进仓库；新增文件放进 `StarSprout/` 对应目录即可，不要手改 pbxproj。
 - 完整构建日志在 `build/logs/`。改完代码必须跑一遍脚本，测试全过再提交。
 - 推送到 `main` 会触发 GitHub Actions，在本机自托管 runner（标签 `starsprout`，目录 `~/actions-runner-starsprout`）上跑同一个脚本。
@@ -69,7 +70,7 @@ SwiftUI + SwiftData，iOS 17+，Swift 5 语言模式，无服务器、无第三�
 ## 已知待办
 
 - 美术：树（7 阶段 × 4 状态，带表情）、2.5D 漂浮小岛、装饰、小兔子都用 SwiftUI 矢量绘制（`Kid/TreeView.swift`、`Kid/IslandArt.swift`、`Kid/DecorationArt.swift`，插画专用色写在这些文件里）。`-screen trees` / `-screen decor` 是美术检查页。将来要更细腻的动效再考虑 Lottie / Rive
-- 分享卡二维码、App 正式名称、隐私政策和儿童个人信息保护规则正文
+- 分享卡二维码、App 正式名称、App Store 截图和描述、儿童类别（Kids）申报
 - 第二阶段：新种子、扩建、星果兑换真实奖励、屏幕时间自动管控（Family Controls）
 - 界面已用 `scripts/screenshots.sh` 逐页截图检查过一轮（2026-11-08）；美术替换后需再过一遍
 
