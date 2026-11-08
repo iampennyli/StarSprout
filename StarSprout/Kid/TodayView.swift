@@ -114,7 +114,7 @@ struct TodayView: View {
         return Button { tab = .planet } label: {
             HStack(spacing: 12) {
                 ZStack(alignment: .bottom) {
-                    Circle().fill(Theme.planet).frame(width: 64, height: 64).offset(y: 22)
+                    PlanetBody(stage: stage, diameter: 64).offset(y: 24)
                     TreeView(stage: stage, mood: mood).scaleEffect(0.24).frame(width: 58, height: 62)
                 }
                 .frame(width: 72, height: 72)

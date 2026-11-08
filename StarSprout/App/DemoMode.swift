@@ -10,6 +10,7 @@ import SwiftData
 enum DemoScreen: String, CaseIterable {
     case onboarding, today, planet, vault, session, success, medal, share
     case parent, parentTasks, parentRewards, pin
+    case trees      // 美术检查：7 个阶段 × 4 种状态
 }
 
 enum DemoMode {

@@ -86,14 +86,13 @@ struct PlanetView: View {
             Circle().fill(Theme.leaf.opacity(0.08)).frame(width: 260, height: 260).padding(.bottom, 150)
             // 星环后半圈在星球后面，前半圈压在星球前面，看起来是环绕而不是穿过
             Ellipse().trim(from: 0.5, to: 1).stroke(Theme.pink.opacity(0.35), lineWidth: 4)
-                .frame(width: 370, height: 66).padding(.bottom, 28)
-            Circle().fill(Theme.planet).frame(width: 340, height: 340).offset(y: 200)
-            Ellipse().trim(from: 0, to: 0.5).stroke(Theme.pink.opacity(0.6), lineWidth: 4)
-                .frame(width: 370, height: 66).padding(.bottom, 28)
-            // 星球顶上的一片草地，小树长在上面；种子阶段只是一小块土
-            Ellipse().fill(stage >= 3 ? Theme.leaf : Theme.leaf.opacity(0.55))
-                .frame(width: stage >= 3 ? 200 : 110, height: stage >= 3 ? 30 : 20)
-                .padding(.bottom, stage >= 3 ? 125 : 130)
+                .frame(width: 380, height: 70).padding(.bottom, 26)
+            PlanetBody(stage: stage).offset(y: 200)
+            Ellipse().trim(from: 0, to: 0.5)
+                .stroke(LinearGradient(colors: [Theme.pink.opacity(0.3), Theme.pink.opacity(0.8), Theme.pink.opacity(0.3)],
+                                       startPoint: .leading, endPoint: .trailing), lineWidth: 4)
+                .frame(width: 380, height: 70).padding(.bottom, 26)
+            GrassCap(stage: stage).padding(.bottom, stage >= 3 ? 122 : 128)
 
             Button(action: tapTree) {
                 TreeView(stage: stage, mood: mood)
@@ -107,7 +106,7 @@ struct PlanetView: View {
                     } animation: { _ in .spring(response: 0.3, dampingFraction: 0.45) }
             }
             .buttonStyle(.plain)
-            .padding(.bottom, 126)
+            .padding(.bottom, 134)
             .accessibilityLabel("摸摸小树")
 
             if stage >= 5 {
@@ -116,8 +115,8 @@ struct PlanetView: View {
                         .phaseAnimator([0.0, -24, 0], trigger: bunnyTick) { v, y in v.offset(y: y) }
                 }
                 .buttonStyle(.plain)
-                .offset(x: 92)
-                .padding(.bottom, 124)
+                .offset(x: 84)
+                .padding(.bottom, 136)
                 .accessibilityLabel("摸摸小兔子")
             }
 
