@@ -3,15 +3,23 @@ import SwiftData
 
 struct ParentHomeView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var tab: Int
+
+    init(initialTab: Int = 0) {
+        _tab = State(initialValue: initialTab)
+    }
 
     var body: some View {
-        TabView {
+        TabView(selection: $tab) {
             ApprovalsView(exit: { dismiss() })
                 .tabItem { Label("审批", systemImage: "checkmark.seal") }
+                .tag(0)
             TaskListView(exit: { dismiss() })
                 .tabItem { Label("任务", systemImage: "list.bullet") }
+                .tag(1)
             RewardSettingsView(exit: { dismiss() })
                 .tabItem { Label("奖励", systemImage: "gift") }
+                .tag(2)
         }
         .toolbarBackground(Theme.nav, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)

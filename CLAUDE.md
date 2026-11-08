@@ -8,8 +8,11 @@
 ```bash
 ./scripts/build-and-test.sh                 # 生成工程 + 选最新 iPhone 模拟器 + 编译 + 跑单元测试
 SIM_NAME="iPhone 17" ./scripts/build-and-test.sh
+./scripts/screenshots.sh [today planet …]  # 演示数据 + 模拟器逐页截图 → build/screenshots/
 xcodegen generate && open StarSprout.xcodeproj
 ```
+
+- 演示模式：启动参数 `-demo` 用内存数据库预置一个月数据，`-screen <页面>` 直达某页（`App/DemoMode.swift`）。改了界面后跑截图脚本自查。CI 也会截图并推到 `screenshots` 分支。
 
 - 工程由 `project.yml`（XcodeGen）生成，`StarSprout.xcodeproj` 不进仓库；新增文件放进 `StarSprout/` 对应目录即可，不要手改 pbxproj。
 - 完整构建日志在 `build/logs/`。改完代码必须跑一遍脚本，测试全过再提交。

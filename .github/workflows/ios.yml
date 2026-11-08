@@ -24,6 +24,28 @@ jobs:
       - name: Build & test
         run: ./scripts/build-and-test.sh
 
+  screenshots:
+    name: 模拟器逐页截图
+    needs: local
+    runs-on: [self-hosted, macOS, starsprout]
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Screenshots
+        run: ./scripts/screenshots.sh
+      - name: 推送截图到 screenshots 分支
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          cd build/screenshots
+          git init -q -b screenshots
+          git config user.name "starsprout-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "截图 $SHA"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" screenshots
+
   cloud:
     name: 云端 Mac 构建测试
     if: github.event_name == 'workflow_dispatch' && inputs.cloud

@@ -10,7 +10,11 @@ struct KidTabView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query(sort: \MedalRecord.earnedAt) private var medals: [MedalRecord]
 
-    @State private var tab: KidTab = .today
+    @State private var tab: KidTab
+
+    init(initialTab: KidTab = .today) {
+        _tab = State(initialValue: initialTab)
+    }
     @State private var showPIN = false
     @State private var showParent = false
     @State private var celebratedThisSession = false

@@ -5,6 +5,7 @@ import SwiftData
 struct StarSproutApp: App {
     let container: ModelContainer = {
         do {
+            if DemoMode.isOn { return try DemoMode.makeContainer() }
             return try ModelContainer(for: Schema(AppSchema.models))
         } catch {
             fatalError("无法创建数据库：\(error)")
@@ -26,7 +27,9 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if let s = settingsList.first, s.consented {
+            if let screen = DemoMode.screen, screen != .onboarding {
+                DemoScreenView(screen: screen)
+            } else if let s = settingsList.first, s.consented {
                 KidTabView()
             } else {
                 OnboardingView()
