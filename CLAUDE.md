@@ -10,6 +10,8 @@
 SIM_NAME="iPhone 17" ./scripts/build-and-test.sh
 ./scripts/screenshots.sh [today planet …]  # 演示数据 + 模拟器逐页截图 → build/screenshots/
 python3 scripts/sound/generate_sounds.py  # 重新合成背景音乐和音效（numpy + scipy + ffmpeg）
+./scripts/testflight.sh                    # Release 归档并上传到 App Store Connect / TestFlight（需本机 Xcode 已登录开发者账号）
+python3 scripts/icon/generate_icon.py     # 重新生成 App 图标
 xcodegen generate && open StarSprout.xcodeproj
 ```
 
