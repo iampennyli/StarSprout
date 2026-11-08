@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 BUNDLE=li.penny.starsprout
 OUT=build/screenshots
 SCREENS=("$@")
-[ ${#SCREENS[@]} -eq 0 ] && SCREENS=(onboarding today planet vault session success medal share pin parent parentTasks parentRewards trees shop decor)
+[ ${#SCREENS[@]} -eq 0 ] && SCREENS=(onboarding today planet vault session success medal share pin parent parentTasks parentRewards trees shop decor debug)
 
 command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
 xcodegen generate --quiet

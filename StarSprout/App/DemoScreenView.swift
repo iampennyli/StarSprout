@@ -19,6 +19,12 @@ struct DemoScreenView: View {
         case .trees: TreeGallery()
         case .shop: DemoShop()
         case .decor: DecorGallery()
+        case .debug:
+            #if DEBUG
+            DebugPanelView { _ in }
+            #else
+            EmptyView()
+            #endif
         case .session:
             if let rope = tasks.first(where: { $0.kind == .rope }) {
                 SessionFlowView(task: rope) {}
