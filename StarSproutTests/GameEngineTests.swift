@@ -98,6 +98,13 @@ final class GameEngineTests: XCTestCase {
         XCTAssertTrue(r.checkIn.isRecord)
     }
 
+    func testSoundFilesAreBundled() {
+        XCTAssertNotNil(Bundle.main.url(forResource: "planet_bgm", withExtension: "m4a"))
+        for s in SFX.allCases {
+            XCTAssertNotNil(Bundle.main.url(forResource: "sfx_\(s.rawValue)", withExtension: "wav"), s.rawValue)
+        }
+    }
+
     func testWateringLimitedToThreePerDay() {
         GameEngine.submit(task: rope, value: 100, ctx: ctx, now: day(0))
         for _ in 0..<3 {
