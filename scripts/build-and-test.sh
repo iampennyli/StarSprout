@@ -33,7 +33,7 @@ echo "使用模拟器 $UDID"
 
 mkdir -p build/logs
 LOG="build/logs/test-$(date +%Y%m%d-%H%M%S).log"
-echo "== 编译并测试（完整日志：$LOG）=="
+echo "== 编译并测试（完整日志：${LOG}）=="
 set +e
 xcodebuild test \
   -project StarSprout.xcodeproj \
